@@ -5,7 +5,7 @@
 #include "heapq_tools.h"
 #include "map_tools.h"
 #include "map_types.h"
-#include "ucs_types.h"
+#include "uniform_cost_search_types.h"
 
 static inline int TCODPATH_ucs_heuristic_at(
     TCODPATH_UniformCostSearch* __restrict ucs_data, const int* __restrict index, int distance) {

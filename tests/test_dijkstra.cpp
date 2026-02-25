@@ -1,7 +1,7 @@
 
 #include <libtcod-path/map_tools.h>
 #include <libtcod-path/map_types.h>
-#include <libtcod-path/ucs.h>
+#include <libtcod-path/uniform_cost_search.h>
 
 #include <array>
 #include <catch2/catch_all.hpp>
