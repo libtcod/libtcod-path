@@ -1,0 +1,35 @@
+{
+    "editor.rulers": [
+        120,
+        79
+    ],
+    "files.trimTrailingWhitespace": true,
+    "files.trimFinalNewlines": true,
+    "files.insertFinalNewline": true,
+    "editor.formatOnSave": true,
+    "editor.defaultFormatter": "xaver.clang-format",
+    "cSpell.words": [
+        "Benesch",
+        "buildsystems",
+        "CPACK",
+        "DATAROOTDIR",
+        "heapify",
+        "HEAPQ",
+        "INCLUDEDIR",
+        "INLINES",
+        "libtcod",
+        "LIBTCODPATH",
+        "MSVC",
+        "TCODPATH",
+        "Wextra"
+    ],
+    "cmake.configureArgs": [
+        "-Wdev",
+        "-Wdeprecated",
+        "--log-level=VERBOSE"
+    ],
+    "cmake.configureSettings": {
+        "LIBTCODPATH_CPACK": "ON",
+        "LIBTCODPATH_TESTS": "ON",
+    }
+}
