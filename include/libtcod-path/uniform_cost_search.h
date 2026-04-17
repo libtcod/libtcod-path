@@ -3,14 +3,10 @@
 #include "graph_tools.h"
 #include "graph_types.h"
 #include "heapq_tools.h"
+#include "heuristic_tools.h"
 #include "map_tools.h"
 #include "map_types.h"
 #include "uniform_cost_search_types.h"
-
-static inline int TCODPATH_ucs_heuristic_at(
-    TCODPATH_UniformCostSearch* __restrict ucs_data, const int* __restrict index, int distance) {
-  return distance;
-}
 
 static inline void TCODPATH_ucs_set_edge(
     TCODPATH_UniformCostSearch* __restrict ucs_data,
@@ -23,7 +19,7 @@ static inline void TCODPATH_ucs_set_edge(
   if (distance_at_leaf <= total_distance) return;  // This edge is not better than a previous edge
   TCODPATH_map_set(ucs_data->distance, leaf_index, total_distance);
   TCODPATH_minheap_push(
-      &ucs_data->frontier, TCODPATH_ucs_heuristic_at(ucs_data, leaf_index, total_distance), leaf_index);
+      &ucs_data->frontier, TCODPATH_heuristic_at(ucs_data->heuristic, leaf_index, total_distance), leaf_index);
   if (ucs_data->flow) {
     ;
   }
@@ -62,7 +58,7 @@ static inline void TCODPATH_dijkstra(
        TCODPATH_indexes_iter_step(dimensions, TCODPATH_map_get_shape(distance), index);) {
     if (TCODPATH_map_is_max(distance, index)) continue;
     const int distance_here = TCODPATH_map_get(distance, index);
-    TCODPATH_minheap_push(&ucs_data.frontier, TCODPATH_ucs_heuristic_at(&ucs_data, index, distance_here), index);
+    TCODPATH_minheap_push(&ucs_data.frontier, TCODPATH_heuristic_at(NULL, index, distance_here), index);
   }
   while (true) {
     int err = TCODPATH_ucs_step(&ucs_data);
