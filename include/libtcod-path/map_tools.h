@@ -5,6 +5,7 @@
 #include "map_types.h"
 #include "utility.h"
 
+/// @brief Return the dimensions of `map`. Returns `0` if invalid.
 static inline int TCODPATH_map_get_dimensions(const TCODPATH_Map* __restrict map) {
   if (!map) return 0;
   switch (map->type) {
@@ -18,7 +19,7 @@ static inline int TCODPATH_map_get_dimensions(const TCODPATH_Map* __restrict map
       return 0;
   }
 }
-
+/// @brief Return the shape of `map`. Returns `NULL` if invalid.
 static inline const int* TCODPATH_map_get_shape(const TCODPATH_Map* __restrict map) {
   if (!map) return NULL;
   switch (map->type) {
@@ -32,7 +33,10 @@ static inline const int* TCODPATH_map_get_shape(const TCODPATH_Map* __restrict m
       return NULL;
   }
 }
-
+/// @brief Returns true of `ij` is within the bounds of `map`.
+/// @param map Pointer to map data. Can be `NULL`.
+/// @param ij Node index. Array size must match the `map` dimensions. Can be `NULL`.
+/// @return True of `ij` is within bounds, or false for out-of-bounds or invalid parameters.
 static inline bool TCODPATH_map_in_bounds(const TCODPATH_Map* __restrict map, const int* __restrict ij) {
   if (!map || !ij) return false;  // Invalid map
   const int* bounds = TCODPATH_map_get_shape(map);
@@ -42,7 +46,10 @@ static inline bool TCODPATH_map_in_bounds(const TCODPATH_Map* __restrict map, co
   }
   return true;  // In-bounds
 }
-
+/// @brief Return the data at `ij` in `map`
+/// @param map Pointer to a `map` with array data. Can be `NULL` or an incompatible map type.
+/// @param ij Node index. Array size must match the `map` dimensions. Can be `NULL`.
+/// @return A pointer to the data, or `NULL` for out-of-bounds or invalid parameters or incompatible map types.
 static inline void* TCODPATH_map_at(TCODPATH_Map* __restrict map, const int* __restrict ij) {
   if (!map || !ij) return NULL;
   if (!TCODPATH_map_in_bounds(map, ij)) return NULL;
@@ -65,7 +72,10 @@ static inline void* TCODPATH_map_at(TCODPATH_Map* __restrict map, const int* __r
       return NULL;
   }
 }
-
+/// @brief Return the value at `ij` in `map`.
+/// @param map Pointer to a `map`. Can be NULL.
+/// @param ij Node index. Array size must match the `map` dimensions. Can be `NULL`.
+/// @return The requested value, or `0` on invalid parameters.
 static inline int TCODPATH_map_get(const TCODPATH_Map* __restrict map, const int* __restrict ij) {
   if (!map || !ij) return 0;
   switch (map->type) {
@@ -100,7 +110,10 @@ static inline int TCODPATH_map_get(const TCODPATH_Map* __restrict map, const int
       return 0;
   }
 }
-
+/// @brief Return true if the value at `ij` on `map` is the maximum value for `map`'s int type.
+/// @param map Pointer to a `map`. Can be NULL.
+/// @param ij Node index. Array size must match the `map` dimensions. Can be `NULL`.
+/// @return True for confirmed maximum values, otherwise false.
 static inline bool TCODPATH_map_is_max(const TCODPATH_Map* __restrict map, const int* __restrict ij) {
   if (!map || !ij) return 0;
 
@@ -136,7 +149,11 @@ static inline bool TCODPATH_map_is_max(const TCODPATH_Map* __restrict map, const
       return 0;
   }
 }
-
+/// @brief Set the value at `ij` for `map` to `value`.
+/// Invalid parameters or read-only maps are silently ignored.
+/// @param map Pointer to a `map`. Can be NULL.
+/// @param ij Node index. Array size must match the `map` dimensions. Can be `NULL`.
+/// @param value Value to set.
 static inline void TCODPATH_map_set(TCODPATH_Map* __restrict map, const int* __restrict ij, int value) {
   if (!map || !ij) return;
   switch (map->type) {

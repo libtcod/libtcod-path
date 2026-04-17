@@ -6,6 +6,7 @@
 typedef void TCODPATH_GraphCallback(
     void* userdata, const int* __restrict root_index, const int* __restrict leaf_index, int edge_cost);
 
+/// @brief Enum of graph types for use with tagged unions.
 typedef enum TCODPATH_GraphTypes {
   TCODPATH_GRAPH_UNDEFINED = 0,
   // TCODPATH_GRAPH_CALLBACK = 1,
@@ -13,6 +14,7 @@ typedef enum TCODPATH_GraphTypes {
   TCODPATH_GRAPH_STATIC = 3,
 } TCODPATH_GraphTypes;
 
+/// @brief Common 2D traversal of a map with weighted costs.
 struct TCODPATH_GraphBasic2D {
   int type;  // Must be TCODPATH_GRAPH_BASIC2D
   TCODPATH_Map* __restrict map;  // Pointer to map costs
@@ -20,6 +22,7 @@ struct TCODPATH_GraphBasic2D {
   int diagonal;  // Multiplier for diagonal costs, or 0 to disable diagonal movement
 };
 
+/// @brief A custom edge array for a map with weighted costs.
 struct TCODPATH_GraphStatic {
   int type;  // Must be TCODPATH_GRAPH_STATIC
   TCODPATH_Map* __restrict map;  // Pointer to map costs
@@ -29,6 +32,7 @@ struct TCODPATH_GraphStatic {
   int* __restrict edges;
 };
 
+/// @brief Generic graph tagged union.
 typedef union TCODPATH_Graph {
   int type;
   struct TCODPATH_GraphBasic2D basic2d;

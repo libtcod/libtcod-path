@@ -5,6 +5,7 @@
 
 #include "config.h"
 
+/// @brief Enum tags for map unions.
 typedef enum TCODPATH_MapTypes {
   TCODPATH_MAP_UNDEFINED = 0,
   TCODPATH_MAP_CALLBACK = 1,
@@ -12,6 +13,7 @@ typedef enum TCODPATH_MapTypes {
   TCODPATH_MAP_STRIDES = 3,
 } TCODPATH_MapTypes;
 
+/// @brief Map data based on a callback.
 struct TCODPATH_MapCallback {
   TCODPATH_MapTypes type;  // Must be TCODPATH_MAP_CALLBACK
   int dimensions;
@@ -20,7 +22,7 @@ struct TCODPATH_MapCallback {
   int (*get)(void* userdata, const int* __restrict ij);  // Get callback
   void (*set)(void* userdata, const int* __restrict ij, int v);  // Set callback
 };
-
+/// @brief Contigious map data.
 struct TCODPATH_MapContigious {
   TCODPATH_MapTypes type;  // Must be TCODPATH_MAP_CONTIGIOUS
   int dimensions;
@@ -28,7 +30,7 @@ struct TCODPATH_MapContigious {
   int8_t int_size;  // data array integer byte-size plus sign: -4=int32_t, 1=uint8_t, etc
   unsigned char* __restrict data;  // Pointer to contigious integer array
 };
-
+/// @brief Non-contigious map data.
 struct TCODPATH_MapStrides {
   TCODPATH_MapTypes type;  // Must be TCODPATH_MAP_STRIDES
   int dimensions;

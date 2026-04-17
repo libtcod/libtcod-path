@@ -4,6 +4,7 @@
 #include "heapq_types.h"
 #include "map_types.h"
 
+/// @brief State for Uniform-cost-search.
 typedef struct TCODPATH_UniformCostSearch {
   int dimensions;
   struct TCODPATH_Heap frontier;

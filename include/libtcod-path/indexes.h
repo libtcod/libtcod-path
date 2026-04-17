@@ -1,10 +1,10 @@
 #pragma once
 #include "config.h"
 /// @brief Begin iterating over the indexes of `shape_ij` in row-major order.
-/// Used as the init element for a for loop
+/// Used as the initializer element of a for loop.
+/// Invalid or `NULL` values are silently ignored.
 /// @param n Length of the provided `shape` and `index_out` arrays
 /// @param index_out Output to hold the current index, can be NULL
-/// @details Invalid or NULL values are safe to use.
 /// @code{.c}
 /// {
 ///   int shape[2] = {10, 20};

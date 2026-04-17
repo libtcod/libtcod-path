@@ -1,5 +1,6 @@
+#pragma once
 
-
+/// @brief Common error return codes.
 typedef enum TCODPATH_Error {
   TCODPATH_E_OK = 0,
   TCODPATH_E_ERROR = -1,

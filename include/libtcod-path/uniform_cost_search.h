@@ -35,14 +35,16 @@ static inline void TCODPATH_ucs_set_edge_callback(
   TCODPATH_ucs_set_edge((TCODPATH_UniformCostSearch* __restrict)ucs_data, root_index, leaf_index, edge_cost);
 }
 
+/// @brief Preform a single iteration of UCS. Return the status.
+/// @return `1` when complete, `0` when incomplete, negative value on error.
 static inline int TCODPATH_ucs_step(TCODPATH_UniformCostSearch* __restrict ucs_data) {
   if (!ucs_data) return TCODPATH_E_INVALID_ARGUMENT;
-  if (ucs_data->frontier.size <= 0) return 1;
+  if (ucs_data->frontier.size <= 0) return 1;  // Iteration complete
 
   int index[TCODPATH_MAX_DIMENSIONS];
   TCODPATH_minheap_pop(&ucs_data->frontier, index);
   TCODPATH_graph_foreach_edge(ucs_data->graph, ucs_data->dimensions, index, TCODPATH_ucs_set_edge_callback, ucs_data);
-  return 0;
+  return 0;  // Iteration continues
 }
 
 static inline void TCODPATH_dijkstra(

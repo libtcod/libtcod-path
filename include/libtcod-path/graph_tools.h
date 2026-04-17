@@ -3,6 +3,12 @@
 #include "graph_types.h"
 #include "map_tools.h"
 
+/// @brief Call `callback` for each edge on `graph` from the node at `index`.
+/// @param graph The graph to traverse. Must not be `NULL`.
+/// @param n Length of `index`.
+/// @param index Node to traverse from. Must not be `NULL`.
+/// @param callback Function to call for each edge.
+/// @param userdata Custom pointer passed to `callback`.
 static inline void TCODPATH_graph_foreach_edge(
     TCODPATH_Graph* __restrict graph,
     int n,

@@ -52,17 +52,17 @@ int TCODPATH_heap_init(struct TCODPATH_Heap* heap, size_t data_size) {
     @param heap A TCODPATH_Heap pointer.
  */
 void TCODPATH_heap_clear(struct TCODPATH_Heap* heap) { heap->size = 0; }
-/// Return a pointer to the node at index in heap.  This points directly to the priority value.
+/// @brief Return a pointer to the node at index in heap.  This points directly to the priority value.
 /// Used internally.
 static void* TCODPATH_heap_get_(struct TCODPATH_Heap* heap, int index) {
   return (void*)(heap->heap + index * heap->node_size);
 }
-/// Return a pointer to user data of the node at index in heap.
+/// @brief Return a pointer to user data of the node at index in heap.
 /// Used internally.
 static void* TCODPATH_heap_address_data_(struct TCODPATH_Heap* heap, int index) {
   return heap->heap + index * heap->node_size + heap->data_offset;
 }
-/// Swap two heap elements with each other.
+/// @brief Swap two heap elements with each other.
 /// Used internally.
 static void TCODPATH_heap_swap_(struct TCODPATH_Heap* heap, int lhs, int rhs) {
   unsigned char buffer[TCODPATH_HEAP_MAX_NODE_SIZE];
@@ -70,7 +70,7 @@ static void TCODPATH_heap_swap_(struct TCODPATH_Heap* heap, int lhs, int rhs) {
   memcpy(TCODPATH_heap_get_(heap, lhs), TCODPATH_heap_get_(heap, rhs), heap->node_size);
   memcpy(TCODPATH_heap_get_(heap, rhs), buffer, heap->node_size);
 }
-/// Manually set the priority and data of an existing heap element.
+/// @brief Manually set the priority and data of an existing heap element.
 /// Used internally.
 static void TCODPATH_heap_set_(
     struct TCODPATH_Heap* __restrict heap, int index, int priority, const void* __restrict data) {
@@ -80,12 +80,12 @@ static void TCODPATH_heap_set_(
   *node_priority = priority;
   memcpy(node_data, data, heap->data_size);
 }
-/// Copy a heap element from the index src to the index dest.
+/// @brief Copy a heap element from the index src to the index dest.
 /// Used internally.
 static void TCODPATH_heap_copy_(struct TCODPATH_Heap* heap, int dest, int src) {
   memcpy(TCODPATH_heap_get_(heap, dest), TCODPATH_heap_get_(heap, src), heap->node_size);
 }
-/// Returns true if the priority of the left index is less than the right index.
+/// @brief Returns true if the priority of the left index is less than the right index.
 /// Used internally.
 static bool TCODPATH_minheap_compare_(struct TCODPATH_Heap* minheap, int lhs_index, int rhs_index) {
   assert(minheap->priority_type == -4);
@@ -93,7 +93,7 @@ static bool TCODPATH_minheap_compare_(struct TCODPATH_Heap* minheap, int lhs_ind
   const int* rhs_priority = (int*)TCODPATH_heap_get_(minheap, rhs_index);
   return *lhs_priority < *rhs_priority;
 }
-/// Sort a heap element downwards, away from the root.
+/// @brief Sort a heap element downwards, away from the root.
 /// Used internally.
 static void TCODPATH_minheap_heapify_down_(struct TCODPATH_Heap* minheap, int index) {
   int candidate = index;
@@ -106,7 +106,7 @@ static void TCODPATH_minheap_heapify_down_(struct TCODPATH_Heap* minheap, int in
     TCODPATH_minheap_heapify_down_(minheap, candidate);
   }
 }
-/// Sort a heap element upwards, towards from the root.
+/// @brief Sort a heap element upwards, towards from the root.
 /// Used internally.
 static void TCODPATH_minheap_heapify_up_(struct TCODPATH_Heap* minheap, int index) {
   if (index == 0) return;  // No element is higher than the current one.
