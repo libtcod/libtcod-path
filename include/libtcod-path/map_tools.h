@@ -57,7 +57,7 @@ static inline void* TCODPATH_map_at(TCODPATH_Map* __restrict map, const int* __r
     case TCODPATH_MAP_CONTIGIOUS: {
       const unsigned char* at = map->contigious.data;
       ptrdiff_t stride = TCODPATH_ABS(map->contigious.int_size);
-      for (int i = 0; i < map->contigious.dimensions; ++i) {
+      for (int i = map->contigious.dimensions - 1; i >= 0; --i) {
         at += stride * ij[i];
         stride *= map->contigious.shape[i];
       }

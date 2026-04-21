@@ -17,6 +17,7 @@ static inline void TCODPATH_graph_foreach_edge(
     void* userdata) {
   switch (graph->type) {
     case TCODPATH_GRAPH_BASIC2D: {
+      if (TCODPATH_map_get(graph->basic2d.map, index) <= 0) return;  // Can not move from here (this test might be slow)
       int leaf_index[TCODPATH_MAX_DIMENSIONS];
       for (int i = 0; i < n; ++i) leaf_index[i] = index[i];  // Copy whole index, required for 3D+ graphs
       for (int y = -1; y <= 1; ++y) {  // Iterate over 3x3 grid surrounding index

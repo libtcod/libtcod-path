@@ -9,10 +9,8 @@
 #include "uniform_cost_search_types.h"
 
 static inline void TCODPATH_ucs_set_edge(
-    TCODPATH_UniformCostSearch* __restrict ucs_data,
-    const int* __restrict root_index,
-    const int* __restrict leaf_index,
-    int edge_cost) {
+    void* ucs_data_, const int* __restrict root_index, const int* __restrict leaf_index, int edge_cost) {
+  TCODPATH_UniformCostSearch* __restrict ucs_data = (TCODPATH_UniformCostSearch*)ucs_data_;
   const int distance_at_root = TCODPATH_map_get(ucs_data->distance, root_index);
   const int distance_at_leaf = TCODPATH_map_get(ucs_data->distance, leaf_index);
   const int total_distance = distance_at_root + edge_cost;
@@ -25,12 +23,6 @@ static inline void TCODPATH_ucs_set_edge(
   }
 }
 
-/// @brief Edge callback version of TCODPATH_ucs_set_edge, for passing to TCODPATH_graph_foreach_edge
-static inline void TCODPATH_ucs_set_edge_callback(
-    void* __restrict ucs_data, const int* __restrict root_index, const int* __restrict leaf_index, int edge_cost) {
-  TCODPATH_ucs_set_edge((TCODPATH_UniformCostSearch* __restrict)ucs_data, root_index, leaf_index, edge_cost);
-}
-
 /// @brief Preform a single iteration of UCS. Return the status.
 /// @return `1` when complete, `0` when incomplete, negative value on error.
 static inline int TCODPATH_ucs_step(TCODPATH_UniformCostSearch* __restrict ucs_data) {
@@ -39,7 +31,7 @@ static inline int TCODPATH_ucs_step(TCODPATH_UniformCostSearch* __restrict ucs_d
 
   int index[TCODPATH_MAX_DIMENSIONS];
   TCODPATH_minheap_pop(&ucs_data->frontier, index);
-  TCODPATH_graph_foreach_edge(ucs_data->graph, ucs_data->dimensions, index, TCODPATH_ucs_set_edge_callback, ucs_data);
+  TCODPATH_graph_foreach_edge(ucs_data->graph, ucs_data->dimensions, index, TCODPATH_ucs_set_edge, ucs_data);
   return 0;  // Iteration continues
 }
 
