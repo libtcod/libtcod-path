@@ -6,10 +6,8 @@
 #include "ring_buffer_types.h"
 
 static inline void TCODPATH_ring_buffer_uninit(TCODPATH_RingBuffer* __restrict buffer) {
-  if (buffer->data) {
-    free(buffer->data);
-    buffer->data = NULL;
-  }
+  if (buffer->data) free(buffer->data);
+  buffer = {0};
 }
 
 static inline int TCODPATH_ring_buffer_pop(

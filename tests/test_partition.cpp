@@ -9,13 +9,12 @@
 
 #include "common.h"
 
-static const auto TEST_DATA = std::vector<std::string>{
-    "111#22#",
-    "111#2#3",
-    "111##33",
-};
-
 TEST_CASE("TCODPATH_partition", "") {
+  static const auto TEST_DATA = std::vector<std::string>{
+      "111#22#",
+      "111#2#3",
+      "111##33",
+  };
   static const auto shape =
       std::array<int, 2>{static_cast<int>(TEST_DATA.size()), static_cast<int>(TEST_DATA.at(0).size())};
   auto costs = Map2D(shape);
@@ -34,4 +33,11 @@ TEST_CASE("TCODPATH_partition", "") {
     }
     CHECK(TEST_DATA.at(y) == line);
   };
+}
+
+TEST_CASE("TCODPATH_partition large", "") {
+  auto costs = Map2D({2048, 2048}, 1);
+  auto graph = as_2d_graph(costs, 1, 0);
+  auto partition = Map2D(costs.get_shape(), 0);
+  TCODPATH_partition_from_graph(&graph, partition.c_data());
 }
