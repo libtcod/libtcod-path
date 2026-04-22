@@ -6,9 +6,13 @@
 template <typename T = int>
 class Map2D {
  public:
+  using value_type = T;
+
   Map2D() = default;
   Map2D(std::array<int, 2> shape, T default_value = 0)
       : shape_{std::move(shape)}, data_(shape_.at(0) * shape_.at(1), default_value) {}
+
+  auto get_shape() const noexcept -> const std::array<int, 2>& { return shape_; }
 
   bool in_bounds(const std::array<int, 2>& ij) const noexcept {
     return 0 <= ij.at(0) && ij.at(0) < shape_.at(0) && 0 <= ij.at(1) && ij.at(1) < shape_.at(1);
@@ -45,8 +49,18 @@ class Map2D {
   TCODPATH_Map map_c_{init_c_data()};
 };
 
+inline auto wall_costs_from_test_data(const std::vector<std::string>& test_data) -> Map2D<int> {
+  auto map = Map2D<int>{{(int)test_data.size(), (int)test_data.at(0).size()}};
+  for (int y = 0; y < test_data.size(); ++y) {
+    for (int x = 0; x < test_data.at(y).size(); ++x) {
+      map[{y, x}] = test_data.at(y).at(x) != '#';
+    }
+  }
+  return map;
+}
+
 template <typename T = int>
-auto as_2d_graph(Map2D<T>& map, int cardinal, int diagonal) -> TCODPATH_Graph {
+inline auto as_2d_graph(Map2D<T>& map, int cardinal, int diagonal) -> TCODPATH_Graph {
   auto graph = TCODPATH_Graph{};
   graph.basic2d = TCODPATH_GraphBasic2D{
       TCODPATH_GRAPH_BASIC2D,
@@ -55,4 +69,24 @@ auto as_2d_graph(Map2D<T>& map, int cardinal, int diagonal) -> TCODPATH_Graph {
       diagonal,
   };
   return graph;
+}
+
+inline auto as_string(const std::vector<std::string>& input) -> std::string {
+  auto string = std::string{};
+  for (int y = 0; y < input.size(); ++y) {
+    string.append(input.at(y));
+    if (y != input.size() - 1) string.push_back('\n');
+  }
+  return string;
+}
+template <typename T = int>
+inline auto as_string(const Map2D<T>& input) -> std::string {
+  auto string = std::string{};
+  for (int y = 0; y < input.get_shape().at(0); ++y) {
+    for (int x = 0; x < input.get_shape().at(1); ++x) {
+      string.push_back(input[{y, x}] == std::numeric_limits<T>::max() ? '#' : '0' + (char)input[{y, x}]);
+    }
+    if (y != input.get_shape().at(0) - 1) string.push_back('\n');
+  }
+  return string;
 }
