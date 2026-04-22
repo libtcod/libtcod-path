@@ -7,14 +7,14 @@
 /// @param index_out Output to hold the current index, can be NULL
 /// @code{.c}
 /// {
-///   int shape[2] = {10, 20};
-///   int index[2];
+///   TCODPATH_IndexType shape[2] = {10, 20};
+///   TCODPATH_IndexType index[2];
 ///   for (TCODPATH_indexes_iter_begin(2, index); TCODPATH_indexes_iter_step(2, shape, index);) {
 ///     // Operate on each index
 ///   }
 /// }
 /// @endcode{.c}
-static inline void TCODPATH_indexes_iter_begin(int n, int* __restrict index_out) {
+static inline void TCODPATH_indexes_iter_begin(int n, TCODPATH_IndexType* __restrict index_out) {
   if (!index_out) return;  // Missing output array
   if (n < 0 || n > TCODPATH_MAX_DIMENSIONS) return;  // Invalid length
   for (int i = 0; i < n; ++i) index_out[i] = 0;
@@ -26,7 +26,8 @@ static inline void TCODPATH_indexes_iter_begin(int n, int* __restrict index_out)
 /// @param shape The shape to iterate over, can be NULL
 /// @param index_out Output to hold the current index, can be NULL
 /// @return `true` if the current `index_out` is valid, `false` otherwise.
-static inline bool TCODPATH_indexes_iter_step(int n, const int* __restrict shape, int* __restrict index_out) {
+static inline bool TCODPATH_indexes_iter_step(
+    int n, const TCODPATH_IndexType* __restrict shape, TCODPATH_IndexType* __restrict index_out) {
   if (!index_out || !shape) return false;  // Missing array pointer
   if (n < 0 || n > TCODPATH_MAX_DIMENSIONS) return false;  // Invalid length
   for (int i = n - 1; i >= 0; --i) {  // Increment index in row-major order

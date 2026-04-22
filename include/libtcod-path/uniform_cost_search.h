@@ -9,11 +9,14 @@
 #include "uniform_cost_search_types.h"
 
 static inline void TCODPATH_ucs_set_edge(
-    void* ucs_data_, const int* __restrict root_index, const int* __restrict leaf_index, int edge_cost) {
+    void* ucs_data_,
+    const TCODPATH_IndexType* __restrict root_index,
+    const TCODPATH_IndexType* __restrict leaf_index,
+    TCODPATH_ValueType edge_cost) {
   TCODPATH_UniformCostSearch* __restrict ucs_data = (TCODPATH_UniformCostSearch*)ucs_data_;
-  const int distance_at_root = TCODPATH_map_get(ucs_data->distance, root_index);
-  const int distance_at_leaf = TCODPATH_map_get(ucs_data->distance, leaf_index);
-  const int total_distance = distance_at_root + edge_cost;
+  const TCODPATH_ValueType distance_at_root = TCODPATH_map_get(ucs_data->distance, root_index);
+  const TCODPATH_ValueType distance_at_leaf = TCODPATH_map_get(ucs_data->distance, leaf_index);
+  const TCODPATH_ValueType total_distance = distance_at_root + edge_cost;
   if (distance_at_leaf <= total_distance) return;  // This edge is not better than a previous edge
   TCODPATH_map_set(ucs_data->distance, leaf_index, total_distance);
   TCODPATH_minheap_push(
@@ -29,7 +32,7 @@ static inline int TCODPATH_ucs_step(TCODPATH_UniformCostSearch* __restrict ucs_d
   if (!ucs_data) return TCODPATH_E_INVALID_ARGUMENT;
   if (ucs_data->frontier.size <= 0) return 1;  // Iteration complete
 
-  int index[TCODPATH_MAX_DIMENSIONS];
+  TCODPATH_IndexType index[TCODPATH_MAX_DIMENSIONS];
   TCODPATH_minheap_pop(&ucs_data->frontier, index);
   TCODPATH_graph_foreach_edge(ucs_data->graph, ucs_data->dimensions, index, TCODPATH_ucs_set_edge, ucs_data);
   return 0;  // Iteration continues
@@ -39,17 +42,17 @@ static inline void TCODPATH_dijkstra(
     TCODPATH_Graph* __restrict graph, TCODPATH_Map* __restrict distance, TCODPATH_Map* __restrict flow) {
   TCODPATH_UniformCostSearch ucs_data = {0};
   const int dimensions = ucs_data.dimensions = TCODPATH_map_get_dimensions(distance);
-  TCODPATH_heap_init(&ucs_data.frontier, dimensions * sizeof(int));
+  TCODPATH_IndexType index[TCODPATH_MAX_DIMENSIONS];
+  TCODPATH_heap_init(&ucs_data.frontier, dimensions * sizeof(*index));
   ucs_data.graph = graph;
   ucs_data.distance = distance;
   ucs_data.flow = flow;
 
   // Use non-max values of distance to initialize the frontier
-  int index[TCODPATH_MAX_DIMENSIONS];
   for (TCODPATH_indexes_iter_begin(dimensions, index);
        TCODPATH_indexes_iter_step(dimensions, TCODPATH_map_get_shape(distance), index);) {
     if (TCODPATH_map_is_max(distance, index)) continue;
-    const int distance_here = TCODPATH_map_get(distance, index);
+    const TCODPATH_ValueType distance_here = TCODPATH_map_get(distance, index);
     TCODPATH_minheap_push(&ucs_data.frontier, TCODPATH_heuristic_at(NULL, index, distance_here), index);
   }
   while (true) {

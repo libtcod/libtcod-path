@@ -3,16 +3,20 @@
 #include <libtcod-path/graph_types.h>
 #include <libtcod-path/map_types.h>
 
-template <typename T = int>
+template <typename ValueType = TCODPATH_ValueType, typename IndexType = TCODPATH_IndexType>
 class Map2D {
  public:
-  using value_type = T;
+  using value_type = ValueType;
+  using index_type = IndexType;
 
   Map2D() = default;
-  Map2D(std::array<int, 2> shape, T default_value = 0)
+  Map2D(std::array<index_type, 2> shape, value_type default_value = 0)
       : shape_{std::move(shape)}, data_(shape_.at(0) * shape_.at(1), default_value) {}
+  template <typename IndexType>
+  Map2D(const std::array<IndexType, 2>& shape, value_type default_value = 0)
+      : Map2D{{static_cast<index_type>(shape.at(0)), static_cast<index_type>(shape.at(1))}, default_value} {}
 
-  auto get_shape() const noexcept -> const std::array<int, 2>& { return shape_; }
+  auto get_shape() const noexcept -> const std::array<index_type, 2>& { return shape_; }
 
   bool in_bounds(const std::array<int, 2>& ij) const noexcept {
     return 0 <= ij.at(0) && ij.at(0) < shape_.at(0) && 0 <= ij.at(1) && ij.at(1) < shape_.at(1);
@@ -21,11 +25,11 @@ class Map2D {
     if (!in_bounds(ij)) throw std::out_of_range("index out of range of Map2D");
   }
 
-  T& operator[](const std::array<int, 2>& ij) noexcept {
+  value_type& operator[](const std::array<int, 2>& ij) noexcept {
     range_check(ij);
     return data_.at(ij.at(0) * shape_.at(1) + ij.at(1));
   }
-  const T& operator[](const std::array<int, 2>& ij) const noexcept {
+  const value_type& operator[](const std::array<int, 2>& ij) const noexcept {
     range_check(ij);
     return data_.at(ij.at(0) * shape_.at(1) + ij.at(1));
   }
@@ -39,20 +43,20 @@ class Map2D {
     data.contigious.type = TCODPATH_MAP_CONTIGIOUS;
     data.contigious.dimensions = 2;
     data.contigious.shape = shape_.data();
-    data.contigious.int_size = -4;
+    data.contigious.int_size = static_cast<int>(sizeof(value_type)) * (std::is_signed_v<value_type> ? -1 : 1);
     data.contigious.data = reinterpret_cast<unsigned char*>(data_.data());
     return data;
   }
 
-  std::array<int, 2> shape_{};
-  std::vector<T> data_{};
+  std::array<index_type, 2> shape_{};
+  std::vector<value_type> data_{};
   TCODPATH_Map map_c_{init_c_data()};
 };
 
-inline auto wall_costs_from_test_data(const std::vector<std::string>& test_data) -> Map2D<int> {
-  auto map = Map2D<int>{{(int)test_data.size(), (int)test_data.at(0).size()}};
-  for (int y = 0; y < test_data.size(); ++y) {
-    for (int x = 0; x < test_data.at(y).size(); ++x) {
+inline auto wall_costs_from_test_data(const std::vector<std::string>& test_data) -> Map2D<TCODPATH_IndexType> {
+  auto map = Map2D<TCODPATH_IndexType>{std::array{test_data.size(), test_data.at(0).size()}};
+  for (TCODPATH_IndexType y = 0; y < test_data.size(); ++y) {
+    for (TCODPATH_IndexType x = 0; x < test_data.at(y).size(); ++x) {
       map[{y, x}] = test_data.at(y).at(x) != '#';
     }
   }
@@ -60,7 +64,7 @@ inline auto wall_costs_from_test_data(const std::vector<std::string>& test_data)
 }
 
 template <typename T = int>
-inline auto as_2d_graph(Map2D<T>& map, int cardinal, int diagonal) -> TCODPATH_Graph {
+inline auto as_2d_graph(Map2D<T>& map, TCODPATH_ValueType cardinal, TCODPATH_ValueType diagonal) -> TCODPATH_Graph {
   auto graph = TCODPATH_Graph{};
   graph.basic2d = TCODPATH_GraphBasic2D{
       TCODPATH_GRAPH_BASIC2D,

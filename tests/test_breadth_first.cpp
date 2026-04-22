@@ -1,3 +1,5 @@
+#define TCODPATH_ValueType int16_t
+#define TCODPATH_IndexType int16_t
 
 #include <libtcod-path/breadth_first_search.h>
 
@@ -15,7 +17,7 @@ TEST_CASE("TCODPATH_bfs", "") {
       "2234567",
   };
   auto costs = wall_costs_from_test_data(TEST_DATA);
-  auto distance = Map2D(costs.get_shape(), std::numeric_limits<int>::max());
+  auto distance = Map2D(costs.get_shape(), std::numeric_limits<Map2D<>::value_type>::max());
   distance[{0, 0}] = 0;
   auto graph = as_2d_graph(costs, 1, 1);
   TCODPATH_bfs(&graph, distance.c_data(), nullptr);
@@ -25,7 +27,7 @@ TEST_CASE("TCODPATH_bfs", "") {
 TEST_CASE("TCODPATH_bfs large", "") {
   static constexpr auto SIZE = 2048;
   auto costs = Map2D{{SIZE, SIZE}, 1};
-  auto distance = Map2D(costs.get_shape(), std::numeric_limits<int>::max());
+  auto distance = Map2D(costs.get_shape(), std::numeric_limits<Map2D<>::value_type>::max());
   distance[{0, 0}] = 0;
   auto graph = as_2d_graph(costs, 1, 1);
   TCODPATH_bfs(&graph, distance.c_data(), nullptr);

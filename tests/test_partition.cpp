@@ -1,3 +1,5 @@
+#define TCODPATH_ValueType int16_t
+#define TCODPATH_IndexType int16_t
 
 #include <libtcod-path/graph_types.h>
 #include <libtcod-path/partition.h>
@@ -15,8 +17,8 @@ TEST_CASE("TCODPATH_partition", "") {
       "111#2#3",
       "111##33",
   };
-  static const auto shape =
-      std::array<int, 2>{static_cast<int>(TEST_DATA.size()), static_cast<int>(TEST_DATA.at(0).size())};
+  static const auto shape = std::array{
+      static_cast<TCODPATH_IndexType>(TEST_DATA.size()), static_cast<TCODPATH_IndexType>(TEST_DATA.at(0).size())};
   auto costs = Map2D(shape);
   for (int y = 0; y < TEST_DATA.size(); ++y) {
     for (int x = 0; x < TEST_DATA.at(y).size(); ++x) {

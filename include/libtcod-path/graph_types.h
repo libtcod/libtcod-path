@@ -4,7 +4,10 @@
 #include "map_types.h"
 
 typedef void TCODPATH_GraphCallback(
-    void* userdata, const int* __restrict root_index, const int* __restrict leaf_index, int edge_cost);
+    void* userdata,
+    const TCODPATH_IndexType* __restrict root_index,
+    const TCODPATH_IndexType* __restrict leaf_index,
+    TCODPATH_ValueType edge_cost);
 
 /// @brief Enum of graph types for use with tagged unions.
 typedef enum TCODPATH_GraphTypes {
@@ -18,8 +21,8 @@ typedef enum TCODPATH_GraphTypes {
 struct TCODPATH_GraphBasic2D {
   int type;  // Must be TCODPATH_GRAPH_BASIC2D
   TCODPATH_Map* __restrict map;  // Pointer to map costs
-  int cardinal;  // Multiplier for cardinal costs, or 0 to disable cardinal movement
-  int diagonal;  // Multiplier for diagonal costs, or 0 to disable diagonal movement
+  TCODPATH_ValueType cardinal;  // Multiplier for cardinal costs, or 0 to disable cardinal movement
+  TCODPATH_ValueType diagonal;  // Multiplier for diagonal costs, or 0 to disable diagonal movement
 };
 
 /// @brief A custom edge array for a map with weighted costs.
