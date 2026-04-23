@@ -52,7 +52,7 @@ int TCODPATH_partition_from_graph(TCODPATH_Graph* __restrict graph, TCODPATH_Map
     flood_fill_data.map = out;
     flood_fill_data.value = total_partitions;
     TCODPATH_partition_flood_fill(&flood_fill_data, NULL, index, 0);
-    while (flood_fill_data.frontier.used) {  // Until ring buffer is empty
+    while (flood_fill_data.frontier.used_bytes) {  // Until ring buffer is empty
       TCODPATH_IndexType next_index[TCODPATH_MAX_DIMENSIONS];
       TCODPATH_ring_buffer_pop(&flood_fill_data.frontier, sizeof(*index) * dimensions, next_index);
       TCODPATH_map_set(out, next_index, total_partitions);

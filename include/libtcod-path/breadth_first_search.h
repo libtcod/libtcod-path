@@ -24,7 +24,7 @@ static inline void TCODPATH_bfs_set_edge(
 
 static inline int TCODPATH_bfs_step(TCODPATH_BreadthFirstSearch* __restrict bfs_data) {
   if (!bfs_data) return TCODPATH_E_INVALID_ARGUMENT;
-  if (bfs_data->frontier.used <= 0) return 1;  // Iteration complete
+  if (bfs_data->frontier.used_bytes <= 0) return 1;  // Iteration complete
 
   TCODPATH_IndexType index[TCODPATH_MAX_DIMENSIONS];
   TCODPATH_ring_buffer_pop(&bfs_data->frontier, sizeof(*index) * bfs_data->dimensions, index);
