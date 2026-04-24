@@ -1,6 +1,7 @@
 #define TCODPATH_ValueType int16_t
 #define TCODPATH_IndexType int16_t
 
+#include <libtcod-path/flow_tools.h>
 #include <libtcod-path/uniform_cost_search.h>
 
 #include <array>
@@ -22,10 +23,26 @@ TEST_CASE("TCODPATH_dijkstra", "") {
       2,
       3,
   };
-  TCODPATH_dijkstra(&graph, distance.c_data(), nullptr);
+
+  auto flow_data = std::vector<TCODPATH_IndexType>(distance.get_shape().at(0) * distance.get_shape().at(1) * 2);
+  auto flow_shape = std::array<TCODPATH_IndexType, 3>{distance.get_shape().at(0), distance.get_shape().at(1), 2};
+  auto flow_map = TCODPATH_Map{};
+  flow_map.contigious.type = TCODPATH_MAP_CONTIGIOUS;
+  flow_map.contigious.dimensions = 3;
+  flow_map.contigious.shape = flow_shape.data();
+  flow_map.contigious.data = reinterpret_cast<unsigned char*>(flow_data.data());
+  flow_map.contigious.int_type =
+      static_cast<int>(sizeof(TCODPATH_IndexType)) * (std::is_signed_v<TCODPATH_IndexType> ? -1 : 1);
+  TCODPATH_flow_reset(&flow_map);
+
+  TCODPATH_dijkstra(&graph, distance.c_data(), &flow_map);
   REQUIRE(distance[{0, 0}] == 0);
   REQUIRE(distance[{1, 0}] == 2);
   REQUIRE(distance[{2, 0}] == 4);
   REQUIRE(distance[{1, 1}] == std::numeric_limits<Map2D<>::value_type>::max());
   REQUIRE(distance[{2, 1}] == 5);
+
+  static const auto EXPECTED_PATH = std::vector<std::array<TCODPATH_IndexType, 2>>{{0, 1}, {0, 0}};
+  auto path = get_path(flow_map, {1, 2});
+  REQUIRE(path == EXPECTED_PATH);
 }

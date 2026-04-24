@@ -1,4 +1,5 @@
 #pragma once
+#include <stdint.h>
 
 #ifndef TCODPATH_MAX_DIMENSIONS
 /// @brief Maximum number of dimensions for map types.

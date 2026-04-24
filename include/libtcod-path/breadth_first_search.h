@@ -17,9 +17,7 @@ static inline void TCODPATH_bfs_set_edge(
   if (distance_at_leaf <= total_distance) return;  // This edge is not better than a previous edge
   TCODPATH_map_set(bfs_data->distance, leaf_index, total_distance);
   TCODPATH_ring_buffer_append(&bfs_data->frontier, sizeof(*leaf_index) * bfs_data->dimensions, leaf_index);
-  if (bfs_data->flow) {
-    ;
-  }
+  if (bfs_data->flow) TCODPATH_map_set_index(bfs_data->flow, leaf_index, root_index);
 }
 
 static inline int TCODPATH_bfs_step(TCODPATH_BreadthFirstSearch* __restrict bfs_data) {

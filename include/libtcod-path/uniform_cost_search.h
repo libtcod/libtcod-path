@@ -21,9 +21,7 @@ static inline void TCODPATH_ucs_set_edge(
   TCODPATH_map_set(ucs_data->distance, leaf_index, total_distance);
   TCODPATH_minheap_push(
       &ucs_data->frontier, TCODPATH_heuristic_at(ucs_data->heuristic, leaf_index, total_distance), leaf_index);
-  if (ucs_data->flow) {
-    ;
-  }
+  if (ucs_data->flow) TCODPATH_map_set_index(ucs_data->flow, leaf_index, root_index);
 }
 
 /// @brief Preform a single iteration of UCS. Return the status.

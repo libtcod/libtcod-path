@@ -1,5 +1,6 @@
 #pragma once
 
+#include "assert.h"
 #include "config.h"
 #include "indexes.h"
 #include "limits.h"
@@ -57,7 +58,7 @@ static inline void* TCODPATH_map_at(TCODPATH_Map* __restrict map, const TCODPATH
   switch (map->type) {
     case TCODPATH_MAP_CONTIGIOUS: {
       const unsigned char* at = map->contigious.data;
-      ptrdiff_t stride = TCODPATH_ABS(map->contigious.int_size);
+      ptrdiff_t stride = TCODPATH_ABS(map->contigious.int_type);
       for (int i = map->contigious.dimensions - 1; i >= 0; --i) {
         at += stride * ij[i];
         stride *= map->contigious.shape[i];
@@ -87,7 +88,7 @@ static inline TCODPATH_ValueType TCODPATH_map_get(
     case TCODPATH_MAP_STRIDES: {
       const void* at = TCODPATH_map_at((TCODPATH_Map*)map, ij);
       if (at == NULL) return 0;  // Out-of-bounds
-      switch (map->strides.int_size) {
+      switch (map->strides.int_type) {
         case 1:
           return (TCODPATH_ValueType)(*(uint8_t*)at);
         case 2:
@@ -105,6 +106,7 @@ static inline TCODPATH_ValueType TCODPATH_map_get(
         case -8:
           return (TCODPATH_ValueType)(*(int64_t*)at);
         default:
+          assert(0);  // int_type undefined or invalid
           return 0;
       }
     }
@@ -126,7 +128,7 @@ static inline bool TCODPATH_map_is_max(const TCODPATH_Map* __restrict map, const
     case TCODPATH_MAP_STRIDES: {
       const void* at = TCODPATH_map_at((TCODPATH_Map*)map, ij);
       if (at == NULL) return 0;  // Out-of-bounds
-      switch (map->strides.int_size) {
+      switch (map->strides.int_type) {
         case 1:
           return *(uint8_t*)at == UINT8_MAX;
         case 2:
@@ -144,6 +146,7 @@ static inline bool TCODPATH_map_is_max(const TCODPATH_Map* __restrict map, const
         case -8:
           return *(int64_t*)at == INT64_MAX;
         default:
+          assert(0);  // int_type undefined or invalid
           return 0;
       }
     }
@@ -166,7 +169,7 @@ static inline void TCODPATH_map_set(
     case TCODPATH_MAP_STRIDES: {
       void* at = TCODPATH_map_at(map, ij);
       if (at == NULL) return;  // Out-of-bounds
-      switch (map->strides.int_size) {
+      switch (map->strides.int_type) {
         case 1:
           *(uint8_t*)at = (uint8_t)value;
           return;
@@ -192,10 +195,41 @@ static inline void TCODPATH_map_set(
           *(int64_t*)at = (int64_t)value;
           return;
         default:
+          assert(0);  // int_type undefined or invalid
           return;
       }
     }
     default:
       return;
+  }
+}
+/// @brief Return the index at `ij` in `map`.
+/// @param map Pointer to a `map`. Can be NULL.
+/// @param ij Index of index. Array size must match the `map` dimensions - 1 (because the last axis is the index).
+/// @param out Output array which must be the same size as the last axis.
+static inline void TCODPATH_map_get_index(
+    const TCODPATH_Map* __restrict map, const TCODPATH_IndexType* __restrict ij, TCODPATH_IndexType* __restrict out) {
+  if (!map || !ij || !out) return;
+  const int dimensions = TCODPATH_map_get_dimensions(map);
+  TCODPATH_IndexType index[TCODPATH_MAX_DIMENSIONS];
+  for (int i = 0; i < dimensions - 1; ++i) index[i] = ij[i];
+  for (TCODPATH_IndexType i = 0; i < dimensions - 1; ++i) {
+    index[dimensions - 1] = i;
+    out[i] = TCODPATH_map_get(map, index);
+  }
+}
+/// @brief Set the index at `ij` for `map` to `value`.
+/// @param map Pointer to a `map`. Can be NULL.
+/// @param ij Index of index. Array size must match the `map` dimensions - 1 (because the last axis is the index).
+/// @param value Input array which must be the same size as the last axis.
+static inline void TCODPATH_map_set_index(
+    TCODPATH_Map* __restrict map, const TCODPATH_IndexType* __restrict ij, const TCODPATH_IndexType* __restrict value) {
+  if (!map || !ij || !value) return;
+  const int dimensions = TCODPATH_map_get_dimensions(map);
+  TCODPATH_IndexType index[TCODPATH_MAX_DIMENSIONS];
+  for (int i = 0; i < dimensions - 1; ++i) index[i] = ij[i];
+  for (TCODPATH_IndexType i = 0; i < dimensions - 1; ++i) {
+    index[dimensions - 1] = i;
+    TCODPATH_map_set(map, index, value[i]);
   }
 }

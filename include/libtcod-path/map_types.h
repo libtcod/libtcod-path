@@ -27,7 +27,7 @@ struct TCODPATH_MapContigious {
   TCODPATH_MapTypes type;  // Must be TCODPATH_MAP_CONTIGIOUS
   int dimensions;
   TCODPATH_IndexType* __restrict shape;
-  int8_t int_size;  // data array integer byte-size plus sign: -4=int32_t, 1=uint8_t, etc
+  int8_t int_type;  // data array integer byte-size plus sign: -4=int32_t, 1=uint8_t, etc
   unsigned char* __restrict data;  // Pointer to contigious integer array
 };
 /// @brief Non-contigious map data.
@@ -35,7 +35,7 @@ struct TCODPATH_MapStrides {
   TCODPATH_MapTypes type;  // Must be TCODPATH_MAP_STRIDES
   int dimensions;
   TCODPATH_IndexType* __restrict shape;
-  int8_t int_size;  // data array integer byte-size plus sign: -4=int32_t, 1=uint8_t, etc
+  int8_t int_type;  // data array integer byte-size plus sign: -4=int32_t, 1=uint8_t, etc
   unsigned char* __restrict data;  // Pointer to strided integer array
   ptrdiff_t* __restrict strides;  // Strides for each axis in bytes
 };

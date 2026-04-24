@@ -1,5 +1,6 @@
 #pragma once
 
+#include <libtcod-path/flow_tools.h>
 #include <libtcod-path/graph_types.h>
 #include <libtcod-path/map_types.h>
 
@@ -43,7 +44,7 @@ class Map2D {
     data.contigious.type = TCODPATH_MAP_CONTIGIOUS;
     data.contigious.dimensions = 2;
     data.contigious.shape = shape_.data();
-    data.contigious.int_size = static_cast<int>(sizeof(value_type)) * (std::is_signed_v<value_type> ? -1 : 1);
+    data.contigious.int_type = static_cast<int>(sizeof(value_type)) * (std::is_signed_v<value_type> ? -1 : 1);
     data.contigious.data = reinterpret_cast<unsigned char*>(data_.data());
     return data;
   }
@@ -93,4 +94,12 @@ inline auto as_string(const Map2D<T>& input) -> std::string {
     if (y != input.get_shape().at(0) - 1) string.push_back('\n');
   }
   return string;
+}
+
+/// Return the path on a flow map, excluding the starting point.
+inline auto get_path(TCODPATH_Map& flow_map, std::array<TCODPATH_IndexType, 2> index)
+    -> std::vector<std::array<TCODPATH_IndexType, 2>> {
+  auto path = std::vector<std::array<TCODPATH_IndexType, 2>>{};
+  while (TCODPATH_flow_iter_next(&flow_map, index.data()) == 0) path.push_back(index);
+  return path;
 }
