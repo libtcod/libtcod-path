@@ -20,7 +20,9 @@ static inline void TCODPATH_ucs_set_edge(
   if (distance_at_leaf <= total_distance) return;  // This edge is not better than a previous edge
   TCODPATH_map_set(ucs_data->distance, leaf_index, total_distance);
   TCODPATH_minheap_push(
-      &ucs_data->frontier, TCODPATH_heuristic_at(ucs_data->heuristic, leaf_index, total_distance), leaf_index);
+      &ucs_data->frontier,
+      TCODPATH_heuristic_at(ucs_data->heuristic, ucs_data->dimensions, leaf_index, total_distance),
+      leaf_index);
   if (ucs_data->flow) TCODPATH_map_set_index(ucs_data->flow, leaf_index, root_index);
 }
 
@@ -51,7 +53,7 @@ static inline void TCODPATH_dijkstra(
        TCODPATH_indexes_iter_step(dimensions, TCODPATH_map_get_shape(distance), index);) {
     if (TCODPATH_map_is_max(distance, index)) continue;
     const TCODPATH_ValueType distance_here = TCODPATH_map_get(distance, index);
-    TCODPATH_minheap_push(&ucs_data.frontier, TCODPATH_heuristic_at(NULL, index, distance_here), index);
+    TCODPATH_minheap_push(&ucs_data.frontier, TCODPATH_heuristic_at(NULL, dimensions, index, distance_here), index);
   }
   while (true) {
     int err = TCODPATH_ucs_step(&ucs_data);
