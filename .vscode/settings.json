@@ -31,5 +31,6 @@
     "cmake.configureSettings": {
         "LIBTCODPATH_CPACK": "ON",
         "LIBTCODPATH_TESTS": "ON",
+        "LIBTCODPATH_TOOLS": "ON",
     }
 }

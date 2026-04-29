@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.24...4.2)
 
 option(LIBTCODPATH_CPACK "Enable CPack" OFF)
 option(LIBTCODPATH_TESTS "Build and enable unit tests" OFF)
+option(LIBTCODPATH_TOOLS "Build and enable tools" OFF)
 option(LIBTCODPATH_INSTALL "Enable install targets." ON)
 
 set(LIBTCODPATH_VERSION 0.1)
@@ -16,6 +17,10 @@ add_subdirectory(src)
 
 if(LIBTCODPATH_TESTS)
     add_subdirectory(tests)
+endif()
+
+if(LIBTCODPATH_TOOLS)
+  add_subdirectory(src/visualizer)
 endif()
 
 if(LIBTCODPATH_CPACK)
