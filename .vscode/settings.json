@@ -20,6 +20,8 @@
         "libtcod",
         "LIBTCODPATH",
         "MSVC",
+        "octile",
+        "SCALEMODE",
         "TCODPATH",
         "Wextra"
     ],

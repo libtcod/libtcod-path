@@ -3,27 +3,99 @@
 #include <SDL3/SDL_main.h>
 #include <libtcod.h>
 
-static SDL_Window* g_window{};
-static SDL_Renderer* g_renderer{};
+#include <fstream>
+#include <string>
+
+static SDL_Window* g_window{};  // Active window
+static SDL_Renderer* g_renderer{};  // Active renderer
+
+static std::optional<tcod::Console> g_console{};  // Map console
+static SDL_Texture* g_texture{};  // Map texture
+
+/// @brief Load a map from `path` and make it active.
+/// @details See specification: https://movingai.com/benchmarks/formats.html
+void load_map(const char* path) {
+  auto file = std::ifstream{path, std::ios_base::in};
+  std::string line{};
+  std::getline(file, line);
+  assert(line == std::string("type octile"));
+
+  std::getline(file, line, ' ');
+  assert(line == std::string("height"));
+  int height{};
+  file >> height;
+  file.get();
+  std::getline(file, line, ' ');
+  assert(line == std::string("width"));
+  int width{};
+  file >> width;
+  file.get();
+  std::getline(file, line);
+  assert(line == std::string("map"));
+
+  // Unpack map data into console
+  g_console = tcod::Console{width, height};
+  auto& console = g_console.value();
+  for (auto& it : console) it.ch = '@';
+  for (int y = 0; y < height; ++y) {
+    std::getline(file, line);
+    for (int x = 0; x < width; ++x) console.at({x, y}).ch = line.at(x);
+  }
+
+  // Convert console into texture
+  auto pixels_rgb = std::vector<TCOD_ColorRGB>{};
+  pixels_rgb.reserve(width * height);
+  for (int y = 0; y < height; ++y) {
+    for (int x = 0; x < width; ++x) {
+      switch (console.at({x, y}).ch) {
+        case '.':  // passable terrain
+        case 'G':  // passable terrain
+          pixels_rgb.push_back({255, 255, 255});
+          break;
+        case 'T':  // trees (impassable)
+        case 'S':  // swamp (passable from regular terrain)
+        case 'W':  // water (traversable, but not passable from terrain)
+        case '@':  // out of bounds
+        case 'O':  // out of bounds
+        default:
+          pixels_rgb.push_back({0, 0, 0});
+          break;
+      }
+    }
+  }
+  if (g_texture) SDL_DestroyTexture(g_texture);
+  g_texture = SDL_CreateTexture(g_renderer, SDL_PIXELFORMAT_RGB24, SDL_TEXTUREACCESS_STATIC, width, height);
+  assert(g_texture);
+  SDL_SetTextureScaleMode(g_texture, SDL_SCALEMODE_NEAREST);
+  SDL_UpdateTexture(g_texture, NULL, pixels_rgb.data(), width * 3);
+
+  SDL_SetWindowSize(g_window, width, height);
+}
 
 SDL_AppResult SDL_AppInit(void**, [[maybe_unused]] int argc, [[maybe_unused]] char** argv) {
+  SDL_SetHint(SDL_HINT_RENDER_VSYNC, "1");
   SDL_CreateWindowAndRenderer("Libtcod-path visualizer", 720, 480, SDL_WINDOW_RESIZABLE, &g_window, &g_renderer);
   return SDL_APP_CONTINUE;
 }
 SDL_AppResult SDL_AppIterate(void*) {
-  // render debug grid
   SDL_SetRenderDrawColorFloat(g_renderer, 0, 0, 0, 1);
   SDL_RenderClear(g_renderer);
-  int w, h;
-  SDL_GetRenderOutputSize(g_renderer, &w, &h);
-  SDL_SetRenderDrawColorFloat(g_renderer, 0.2f, 0.2f, 0.2f, 1);
-  constexpr int TILE_SIZE = 4;
-  for (int y = 0; y < h; y += TILE_SIZE) {
-    for (int x = 0; x < w; x += TILE_SIZE) {
-      if (((y / TILE_SIZE) ^ (x / TILE_SIZE)) & 1) continue;
-      auto rect = SDL_FRect{(float)x, (float)y, TILE_SIZE, TILE_SIZE};
-      SDL_RenderFillRect(g_renderer, &rect);
+  if (!g_console.has_value()) {
+    // render debug grid
+    int w, h;
+    SDL_GetRenderOutputSize(g_renderer, &w, &h);
+    SDL_SetRenderDrawColorFloat(g_renderer, 0.2f, 0.2f, 0.2f, 1);
+    constexpr int TILE_SIZE = 4;
+    for (int y = 0; y < h; y += TILE_SIZE) {
+      for (int x = 0; x < w; x += TILE_SIZE) {
+        if (((y / TILE_SIZE) ^ (x / TILE_SIZE)) & 1) continue;
+        auto rect = SDL_FRect{(float)x, (float)y, TILE_SIZE, TILE_SIZE};
+        SDL_RenderFillRect(g_renderer, &rect);
+      }
     }
+  } else {
+    SDL_RenderTexture(g_renderer, g_texture, NULL, NULL);
+    // const auto& console = g_console.value();
   }
   SDL_RenderPresent(g_renderer);
   return SDL_APP_CONTINUE;
@@ -32,7 +104,9 @@ SDL_AppResult SDL_AppEvent(void*, SDL_Event* event) {
   switch (event->type) {
     case SDL_EVENT_QUIT:
       return SDL_APP_SUCCESS;
-
+    case SDL_EVENT_DROP_FILE:
+      load_map(event->drop.data);
+      break;
     default:
       break;
   }
