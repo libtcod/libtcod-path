@@ -29,12 +29,12 @@ TEST_CASE("TCODPATH_dijkstra", "") {
   auto flow_data = std::vector<TCODPATH_IndexType>(distance.get_shape().at(0) * distance.get_shape().at(1) * 2);
   auto flow_shape = std::array<TCODPATH_IndexType, 3>{distance.get_shape().at(0), distance.get_shape().at(1), 2};
   auto flow_map = TCODPATH_Map{};
-  flow_map.contigious.type = TCODPATH_MAP_CONTIGIOUS;
-  flow_map.contigious.dimensions = 3;
-  flow_map.contigious.shape = flow_shape.data();
-  flow_map.contigious.data = reinterpret_cast<unsigned char*>(flow_data.data());
-  flow_map.contigious.int_type =
-      static_cast<int>(sizeof(TCODPATH_IndexType)) * (std::is_signed_v<TCODPATH_IndexType> ? -1 : 1);
+  TCODPATH_map_init_contigious(
+      &flow_map,
+      3,
+      flow_shape.data(),
+      static_cast<int>(sizeof(TCODPATH_IndexType)) * (std::is_signed_v<TCODPATH_IndexType> ? -1 : 1),
+      (void*)flow_data.data());
   TCODPATH_flow_reset(&flow_map);
 
   TCODPATH_dijkstra(&graph, distance.c_data(), &flow_map);

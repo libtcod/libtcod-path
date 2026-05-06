@@ -27,12 +27,12 @@ TEST_CASE("TCODPATH_bfs", "") {
   auto flow_data = std::vector<TCODPATH_IndexType>(distance.get_shape().at(0) * distance.get_shape().at(1) * 2);
   auto flow_shape = std::array<TCODPATH_IndexType, 3>{distance.get_shape().at(0), distance.get_shape().at(1), 2};
   auto flow_map = TCODPATH_Map{};
-  flow_map.contigious.type = TCODPATH_MAP_CONTIGIOUS;
-  flow_map.contigious.dimensions = 3;
-  flow_map.contigious.shape = flow_shape.data();
-  flow_map.contigious.data = reinterpret_cast<unsigned char*>(flow_data.data());
-  flow_map.contigious.int_type =
-      static_cast<int>(sizeof(TCODPATH_IndexType)) * (std::is_signed_v<TCODPATH_IndexType> ? -1 : 1);
+  TCODPATH_map_init_contigious(
+      &flow_map,
+      3,
+      flow_shape.data(),
+      static_cast<int>(sizeof(TCODPATH_IndexType)) * (std::is_signed_v<TCODPATH_IndexType> ? -1 : 1),
+      static_cast<void*>(flow_data.data()));
   TCODPATH_flow_reset(&flow_map);
 
   TCODPATH_bfs(&graph, distance.c_data(), &flow_map);
@@ -43,7 +43,7 @@ TEST_CASE("TCODPATH_bfs", "") {
   REQUIRE(path == EXPECTED_PATH);
 }
 
-TEST_CASE("TCODPATH_bfs large", "") {
+TEST_CASE("TCODPATH_bfs large", "[.slow]") {
   static constexpr auto SIZE = 2048;
   auto costs = Map2D{{SIZE, SIZE}, 1};
   auto distance = Map2D(costs.get_shape(), std::numeric_limits<Map2D<>::value_type>::max());

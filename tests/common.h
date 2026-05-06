@@ -43,7 +43,7 @@ class Map2D {
     TCODPATH_Map data{};
     data.contigious.type = TCODPATH_MAP_CONTIGIOUS;
     data.contigious.dimensions = 2;
-    data.contigious.shape = shape_.data();
+    std::copy(shape_.begin(), shape_.end(), data.contigious.shape);
     data.contigious.int_type = static_cast<int>(sizeof(value_type)) * (std::is_signed_v<value_type> ? -1 : 1);
     data.contigious.data = reinterpret_cast<unsigned char*>(data_.data());
     return data;

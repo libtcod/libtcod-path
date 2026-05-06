@@ -12,7 +12,7 @@ TEST_CASE("TCODPATH_MapContigious", "") {
   contigious.contigious = TCODPATH_MapContigious{
       TCODPATH_MAP_CONTIGIOUS,
       std::ssize(shape),
-      shape.data(),
+      {shape[0], shape[1]},
       -4,
       reinterpret_cast<unsigned char*>(data.data()),
   };

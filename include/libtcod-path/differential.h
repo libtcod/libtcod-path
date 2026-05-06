@@ -17,23 +17,15 @@ static inline void TCODPATH_differential_map_slice(
       TCODPATH_Map as_strides;
       as_strides.strides = TCODPATH_MapStrides{TCODPATH_MAP_STRIDES};
       as_strides.strides.dimensions = differentials->contigious.dimensions;
-      as_strides.strides.shape = differentials->contigious.shape;
+      memcpy(as_strides.strides.shape, differentials->contigious.shape, sizeof(as_strides.strides.shape));
       as_strides.strides.int_type = differentials->contigious.int_type;
       as_strides.strides.data = differentials->contigious.data;
-      as_strides.strides.strides = as_strides.strides.strides_buffer;
-      ptrdiff_t stride = TCODPATH_ABS(as_strides.strides.int_type);
-      for (int i = as_strides.strides.dimensions - 1; i >= 0; --i) {
-        as_strides.strides.strides[i] = stride;
-        stride *= differentials->contigious.shape[i];
-      }
       return TCODPATH_differential_map_slice(&as_strides, differential_index, out);
     }
     case TCODPATH_MAP_STRIDES:
       // Drop the last axis then shift data to the selected differential_index
       out->strides = differentials->strides;
-      if (out->strides.strides == differentials->strides.strides_buffer)
-        out->strides.strides = out->strides.strides_buffer;
-      --out->strides.dimensions;
+      out->strides.dimensions -= 1;
       out->strides.data += differentials->strides.strides[out->strides.dimensions] * differential_index;
       return;
     default:

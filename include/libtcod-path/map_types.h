@@ -17,7 +17,7 @@ typedef enum TCODPATH_MapTypes {
 struct TCODPATH_MapCallback {
   TCODPATH_MapTypes type;  // Must be TCODPATH_MAP_CALLBACK
   int dimensions;
-  TCODPATH_IndexType* __restrict shape;
+  TCODPATH_IndexType shape[TCODPATH_MAX_DIMENSIONS];
   void* userdata;
   TCODPATH_ValueType (*get)(void* userdata, const TCODPATH_IndexType* __restrict ij);  // Get callback
   void (*set)(void* userdata, const TCODPATH_IndexType* __restrict ij, TCODPATH_ValueType v);  // Set callback
@@ -26,19 +26,19 @@ struct TCODPATH_MapCallback {
 struct TCODPATH_MapContigious {
   TCODPATH_MapTypes type;  // Must be TCODPATH_MAP_CONTIGIOUS
   int dimensions;
-  TCODPATH_IndexType* __restrict shape;
+  TCODPATH_IndexType shape[TCODPATH_MAX_DIMENSIONS];
   int8_t int_type;  // data array integer byte-size plus sign: -4=int32_t, 1=uint8_t, etc
   unsigned char* __restrict data;  // Pointer to contigious integer array
+  bool owned_data;  // If true then data pointer will be freed when this object is deleted
 };
 /// @brief Non-contigious map data.
 struct TCODPATH_MapStrides {
   TCODPATH_MapTypes type;  // Must be TCODPATH_MAP_STRIDES
   int dimensions;
-  TCODPATH_IndexType* __restrict shape;
+  TCODPATH_IndexType shape[TCODPATH_MAX_DIMENSIONS];
   int8_t int_type;  // data array integer byte-size plus sign: -4=int32_t, 1=uint8_t, etc
   unsigned char* __restrict data;  // Pointer to strided integer array
-  ptrdiff_t* __restrict strides;  // Strides for each axis in bytes
-  ptrdiff_t strides_buffer[TCODPATH_MAX_DIMENSIONS];  // Optional local storage for strides
+  ptrdiff_t strides[TCODPATH_MAX_DIMENSIONS];  // Strides for each axis in bytes
 };
 
 /// @brief Union type for tile maps.

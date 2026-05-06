@@ -1,5 +1,7 @@
 #pragma once
 
+#include <stdlib.h>
+
 #include "assert.h"
 #include "config.h"
 #include "indexes.h"
@@ -7,6 +9,64 @@
 #include "map_types.h"
 #include "utility.h"
 
+/// @brief Uninitialize maps, freeing owned pointers and zeroing data.
+/// @param map Pointer to generic map, can be NULL
+static inline void TCODPATH_map_uninit(TCODPATH_Map* map) {
+  if (!map) return;
+  switch (map->type) {
+    case TCODPATH_MAP_CONTIGIOUS:
+      if (map->contigious.owned_data && map->contigious.data) {
+        free(map->contigious.data);
+        map->contigious.data = NULL;
+      }
+      break;
+    default:
+      break;
+  }
+  memset(map, 0, sizeof(*map));
+}
+/// @brief Release a map from memory.
+/// @param map Pointer to generic map, can be NULL
+static inline void TCODPATH_map_delete(TCODPATH_Map* map) {
+  if (!map) return;
+  TCODPATH_map_uninit(map);
+  free(map);
+}
+/// @brief Initialize a map from contigious data.
+/// @param map Pointer to a map to setup
+/// @param dimensions Number of dimensions of `shape` and `data`
+/// @param shape Shape of the map and `data` array in row-major order
+/// @param int_type Integer type to use: `-4 = int32_t`, `1 = uint8_t`
+/// @param data Pointer to contigious memory, must be freed separately by default
+static inline void TCODPATH_map_init_contigious(
+    TCODPATH_Map* __restrict map, int dimensions, TCODPATH_IndexType* __restrict shape, int8_t int_type, void* data) {
+  map->type = TCODPATH_MAP_CONTIGIOUS;
+  map->contigious.dimensions = dimensions;
+  for (int i = 0; i < dimensions; ++i) map->contigious.shape[i] = shape[i];
+  map->contigious.int_type = int_type;
+  map->contigious.data = (unsigned char*)data;
+}
+/// @brief Return a new contigious map.
+/// @param dimensions Number of dimensions of `shape`
+/// @param shape Shape of the map in row-major order
+/// @param int_type Integer type to use: `-4 = int32_t`, `1 = uint8_t`
+/// @return The new map, or NULL on error
+static inline TCODPATH_Map* TCODPATH_map_new(int dimensions, TCODPATH_IndexType* __restrict shape, int8_t int_type) {
+  if (!shape) return NULL;
+  TCODPATH_Map* map = (TCODPATH_Map*)calloc(1, sizeof(*map));
+  if (!map) return NULL;
+  size_t elements = 1;
+  for (int i = 0; i < dimensions; ++i) elements *= shape[i];
+  if (!int_type) int_type = -4;
+  void* data = (unsigned char*)calloc(elements, TCODPATH_ABS(int_type));
+  if (!data) {
+    TCODPATH_map_delete(map);
+    return NULL;
+  }
+  TCODPATH_map_init_contigious(map, dimensions, shape, int_type, data);
+  map->contigious.owned_data = 1;
+  return map;
+}
 /// @brief Return the dimensions of `map`. Returns `0` if invalid.
 static inline int TCODPATH_map_get_dimensions(const TCODPATH_Map* __restrict map) {
   if (!map) return 0;
