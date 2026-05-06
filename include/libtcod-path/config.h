@@ -1,4 +1,5 @@
 #pragma once
+#include <limits.h>
 #include <stdint.h>
 
 #ifndef TCODPATH_MAX_DIMENSIONS
@@ -9,7 +10,10 @@
 
 #ifndef TCODPATH_ValueType
 /// @brief Type for map values.
+/// If this is manually set then `TCODPATH_VALUE_MAX` and `TCODPATH_VALUE_MIN` must also be set.
 #define TCODPATH_ValueType int
+#define TCODPATH_VALUE_MAX INT_MAX
+#define TCODPATH_VALUE_MIN INT_MIN
 #endif
 
 #ifndef TCODPATH_IndexType

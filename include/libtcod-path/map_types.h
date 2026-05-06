@@ -38,6 +38,7 @@ struct TCODPATH_MapStrides {
   int8_t int_type;  // data array integer byte-size plus sign: -4=int32_t, 1=uint8_t, etc
   unsigned char* __restrict data;  // Pointer to strided integer array
   ptrdiff_t* __restrict strides;  // Strides for each axis in bytes
+  ptrdiff_t strides_buffer[TCODPATH_MAX_DIMENSIONS];  // Optional local storage for strides
 };
 
 /// @brief Union type for tile maps.

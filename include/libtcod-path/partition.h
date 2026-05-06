@@ -30,7 +30,7 @@ static inline void TCODPATH_partition_flood_fill(
       &data->frontier, sizeof(*leaf_index) * TCODPATH_map_get_dimensions(data->map), leaf_index);
 }
 
-int TCODPATH_partition_from_graph(TCODPATH_Graph* __restrict graph, TCODPATH_Map* __restrict out) {
+static inline int TCODPATH_partition_from_graph(TCODPATH_Graph* __restrict graph, TCODPATH_Map* __restrict out) {
   const int dimensions = TCODPATH_map_get_dimensions(out);
   const TCODPATH_IndexType* shape = TCODPATH_map_get_shape(out);
   TCODPATH_IndexType index[TCODPATH_MAX_DIMENSIONS];

@@ -123,7 +123,7 @@ static inline bool TCODPATH_map_is_max(const TCODPATH_Map* __restrict map, const
 
   switch (map->type) {
     case TCODPATH_MAP_CALLBACK:
-      return map->callback.get(map->callback.userdata, ij) == INT_MAX;
+      return map->callback.get(map->callback.userdata, ij) == TCODPATH_VALUE_MAX;
     case TCODPATH_MAP_CONTIGIOUS:
     case TCODPATH_MAP_STRIDES: {
       const void* at = TCODPATH_map_at((TCODPATH_Map*)map, ij);
@@ -203,6 +203,52 @@ static inline void TCODPATH_map_set(
       return;
   }
 }
+/// @brief Set the value at `ij` for `map` to the maximum finite value
+/// @param map Pointer to a `map`. Can be NULL.
+/// @param ij Node index. Array size must match the `map` dimensions. Can be `NULL`.
+static inline void TCODPATH_map_set_max(TCODPATH_Map* __restrict map, const TCODPATH_IndexType* __restrict ij) {
+  if (!map || !ij) return;
+  switch (map->type) {
+    case TCODPATH_MAP_CALLBACK:
+      return map->callback.set(map->callback.userdata, ij, TCODPATH_VALUE_MAX);
+    case TCODPATH_MAP_CONTIGIOUS:
+    case TCODPATH_MAP_STRIDES: {
+      void* at = TCODPATH_map_at(map, ij);
+      if (at == NULL) return;  // Out-of-bounds
+      switch (map->strides.int_type) {
+        case 1:
+          *(uint8_t*)at = UINT8_MAX;
+          return;
+        case 2:
+          *(uint16_t*)at = UINT16_MAX;
+          return;
+        case 4:
+          *(uint32_t*)at = UINT32_MAX;
+          return;
+        case 8:
+          *(uint64_t*)at = UINT64_MAX;
+          return;
+        case -1:
+          *(int8_t*)at = INT8_MAX;
+          return;
+        case -2:
+          *(int16_t*)at = INT16_MAX;
+          return;
+        case -4:
+          *(int32_t*)at = INT32_MAX;
+          return;
+        case -8:
+          *(int64_t*)at = INT64_MAX;
+          return;
+        default:
+          assert(0);  // int_type undefined or invalid
+          return;
+      }
+    }
+    default:
+      return;
+  }
+}
 /// @brief Return the index at `ij` in `map`.
 /// @param map Pointer to a `map`. Can be NULL.
 /// @param ij Index of index. Array size must match the `map` dimensions - 1 (because the last axis is the index).
@@ -232,4 +278,14 @@ static inline void TCODPATH_map_set_index(
     index[dimensions - 1] = i;
     TCODPATH_map_set(map, index, value[i]);
   }
+}
+/// @brief Set all values on `map` to the maximum finite value
+/// @param map Pointer to a `map`. Can be NULL.
+static inline void TCODPATH_map_clear_max(TCODPATH_Map* __restrict map) {
+  if (!map) return;
+  TCODPATH_IndexType index[TCODPATH_MAX_DIMENSIONS];
+  for (TCODPATH_indexes_iter_begin(TCODPATH_map_get_dimensions(map), index);
+       TCODPATH_indexes_iter_step(TCODPATH_map_get_dimensions(map), TCODPATH_map_get_shape(map), index);) {
+    TCODPATH_map_set_max(map, index);
+  };
 }

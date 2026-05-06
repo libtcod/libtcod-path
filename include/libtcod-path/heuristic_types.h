@@ -31,6 +31,8 @@ struct TCODPATH_HeuristicBasic {
 struct TCODPATH_HeuristicDifferential {
   int type;
   TCODPATH_Map* __restrict differentials;
+  int start_index;
+  int end_index;
   TCODPATH_IndexType target[TCODPATH_MAX_DIMENSIONS];
   bool undirected;
 };

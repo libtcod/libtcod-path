@@ -16,7 +16,7 @@
 
     @param heap A pointer to a TCODPATH_Heap struct, the struct itself is not freed.
  */
-void TCODPATH_heap_uninit(struct TCODPATH_Heap* heap) {
+static inline void TCODPATH_heap_uninit(struct TCODPATH_Heap* heap) {
   if (heap->heap) free(heap->heap);
   heap->heap = NULL;
   heap->size = 0;
@@ -32,7 +32,7 @@ void TCODPATH_heap_uninit(struct TCODPATH_Heap* heap) {
     @param data_size The size of the user data in bytes.
     @return int Returns a negative value on error.
  */
-int TCODPATH_heap_init(struct TCODPATH_Heap* heap, size_t data_size) {
+static inline int TCODPATH_heap_init(struct TCODPATH_Heap* heap, size_t data_size) {
   size_t node_size = sizeof(int) + data_size;
   if (node_size > TCODPATH_HEAP_MAX_NODE_SIZE) {
     return TCODPATH_set_errorvf("Heap data size is too large: %i", (int)node_size);
@@ -51,7 +51,7 @@ int TCODPATH_heap_init(struct TCODPATH_Heap* heap, size_t data_size) {
 
     @param heap A TCODPATH_Heap pointer.
  */
-void TCODPATH_heap_clear(struct TCODPATH_Heap* heap) { heap->size = 0; }
+static inline void TCODPATH_heap_clear(struct TCODPATH_Heap* heap) { heap->size = 0; }
 /// @brief Return a pointer to the node at index in heap.  This points directly to the priority value.
 /// Used internally.
 static void* TCODPATH_heap_get_(struct TCODPATH_Heap* heap, int index) {
@@ -121,7 +121,7 @@ static void TCODPATH_minheap_heapify_up_(struct TCODPATH_Heap* minheap, int inde
 
     @param minheap A TCODPATH_Heap pointer.
  */
-void TCODPATH_minheap_heapify(struct TCODPATH_Heap* minheap) {
+static inline void TCODPATH_minheap_heapify(struct TCODPATH_Heap* minheap) {
   for (int i = minheap->size / 2; i >= 0; --i) TCODPATH_minheap_heapify_down_(minheap, i);
 }
 /***************************************************************************
@@ -130,7 +130,7 @@ void TCODPATH_minheap_heapify(struct TCODPATH_Heap* minheap) {
     @param minheap A TCODPATH_Heap pointer.
     @param out An optional pointer to store the data from the removed element.
  */
-void TCODPATH_minheap_pop(struct TCODPATH_Heap* __restrict minheap, void* __restrict out) {
+static inline void TCODPATH_minheap_pop(struct TCODPATH_Heap* __restrict minheap, void* __restrict out) {
   if (minheap->size == 0) return;  // No element to pop.
   if (out) memcpy(out, minheap->heap + minheap->data_offset, minheap->data_size);
   TCODPATH_heap_copy_(minheap, 0, minheap->size - 1);
@@ -145,7 +145,8 @@ void TCODPATH_minheap_pop(struct TCODPATH_Heap* __restrict minheap, void* __rest
     @param data The data to push onto the heap.  Can not be NULL.
     @return Returns a negative error code on failures.
  */
-int TCODPATH_minheap_push(struct TCODPATH_Heap* __restrict minheap, int priority, const void* __restrict data) {
+static inline int TCODPATH_minheap_push(
+    struct TCODPATH_Heap* __restrict minheap, int priority, const void* __restrict data) {
   if (minheap->size == minheap->capacity) {
     const int new_capacity = (minheap->capacity ? minheap->capacity * 2 : TCODPATH_HEAP_DEFAULT_CAPACITY);
     void* new_heap = realloc(minheap->heap, minheap->node_size * new_capacity);

@@ -1,4 +1,6 @@
 #define TCODPATH_ValueType int16_t
+#define TCODPATH_VALUE_MAX INT16_MAX
+#define TCODPATH_VALUE_MIN INT16_MIN
 #define TCODPATH_IndexType int16_t
 
 #include <libtcod-path/graph_types.h>
