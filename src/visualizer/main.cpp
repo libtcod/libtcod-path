@@ -1,9 +1,13 @@
 #define SDL_MAIN_USE_CALLBACKS
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_main.h>
+#include <libtcod-path/graph_tools.h>
+#include <libtcod-path/heuristic_tools.h>
+#include <libtcod-path/map_tools.h>
 #include <libtcod.h>
 
 #include <fstream>
+#include <libtcod-path/map.hpp>
 #include <string>
 
 static SDL_Window* g_window{};  // Active window
@@ -11,6 +15,22 @@ static SDL_Renderer* g_renderer{};  // Active renderer
 
 static std::optional<tcod::Console> g_console{};  // Map console
 static SDL_Texture* g_texture{};  // Map texture
+
+struct Deleter {
+  void operator()(SDL_Texture* texture) { SDL_DestroyTexture(texture); }
+  void operator()(TCODPATH_Map* map) { TCODPATH_map_delete(map); }
+};
+
+using MapPtr = std::unique_ptr<TCODPATH_Map, Deleter>;
+
+struct MapData {
+  tcod::path::Map2D<> costs{};
+  TCODPATH_Graph graph;
+  tcod::path::Map2D<> distance{};
+  MapPtr flow{};
+};
+
+static MapData g_map_data{};
 
 /// @brief Load a map from `path` and make it active.
 /// @details See specification: https://movingai.com/benchmarks/formats.html
@@ -41,16 +61,15 @@ void load_map(const char* path) {
     std::getline(file, line);
     for (int x = 0; x < width; ++x) console.at({x, y}).ch = line.at(x);
   }
-
-  // Convert console into texture
-  auto pixels_rgb = std::vector<TCOD_ColorRGB>{};
-  pixels_rgb.reserve(width * height);
+  g_map_data.costs = tcod::path::Map2D{{height, width}};
+  g_map_data.distance = tcod::path::Map2D{{height, width}};
+  // Convert console into costs
   for (int y = 0; y < height; ++y) {
     for (int x = 0; x < width; ++x) {
       switch (console.at({x, y}).ch) {
         case '.':  // passable terrain
         case 'G':  // passable terrain
-          pixels_rgb.push_back({255, 255, 255});
+          g_map_data.costs[{y, x}] = 1;
           break;
         case 'T':  // trees (impassable)
         case 'S':  // swamp (passable from regular terrain)
@@ -58,18 +77,18 @@ void load_map(const char* path) {
         case '@':  // out of bounds
         case 'O':  // out of bounds
         default:
-          pixels_rgb.push_back({0, 0, 0});
+          g_map_data.costs[{y, x}] = 0;
           break;
       }
     }
   }
-  if (g_texture) SDL_DestroyTexture(g_texture);
-  g_texture = SDL_CreateTexture(g_renderer, SDL_PIXELFORMAT_RGB24, SDL_TEXTUREACCESS_STATIC, width, height);
-  assert(g_texture);
-  SDL_SetTextureScaleMode(g_texture, SDL_SCALEMODE_NEAREST);
-  SDL_UpdateTexture(g_texture, NULL, pixels_rgb.data(), width * 3);
-
   SDL_SetWindowSize(g_window, width, height);
+
+  g_map_data.graph.basic2d = TCODPATH_GraphBasic2D{
+      .type = TCODPATH_GRAPH_BASIC2D, .map = g_map_data.costs.c_data(), .cardinal = 2, .diagonal = 3};
+
+  auto flow_shape = std::vector<int>{height, width, 2};
+  g_map_data.flow = MapPtr{TCODPATH_map_new(3, flow_shape.data(), -2)};
 }
 
 SDL_AppResult SDL_AppInit(void**, [[maybe_unused]] int argc, [[maybe_unused]] char** argv) {
@@ -94,8 +113,44 @@ SDL_AppResult SDL_AppIterate(void*) {
       }
     }
   } else {
+    const auto& console = g_console.value();
+    if (g_texture) {
+      float w, h = 0;
+      SDL_GetTextureSize(g_texture, &w, &h);
+      if (w != console.get_width() || h != console.get_height()) {
+        SDL_DestroyTexture(g_texture);
+        g_texture = nullptr;
+      }
+    }
+    if (!g_texture) {
+      g_texture = SDL_CreateTexture(
+          g_renderer, SDL_PIXELFORMAT_RGB24, SDL_TEXTUREACCESS_STREAMING, console.get_width(), console.get_height());
+      assert(g_texture);
+      SDL_SetTextureScaleMode(g_texture, SDL_SCALEMODE_NEAREST);
+    }
+    auto pixels_rgb = std::vector<TCOD_ColorRGB>{};
+    pixels_rgb.reserve(console.get_width() * console.get_height());
+    for (int y = 0; y < console.get_height(); ++y) {
+      for (int x = 0; x < console.get_width(); ++x) {
+        switch (console.at({x, y}).ch) {
+          case '.':  // passable terrain
+          case 'G':  // passable terrain
+            pixels_rgb.push_back({255, 255, 255});
+            break;
+          case 'T':  // trees (impassable)
+          case 'S':  // swamp (passable from regular terrain)
+          case 'W':  // water (traversable, but not passable from terrain)
+          case '@':  // out of bounds
+          case 'O':  // out of bounds
+          default:
+            pixels_rgb.push_back({0, 0, 0});
+            break;
+        }
+      }
+    }
+    SDL_UpdateTexture(g_texture, NULL, pixels_rgb.data(), console.get_width() * 3);
+
     SDL_RenderTexture(g_renderer, g_texture, NULL, NULL);
-    // const auto& console = g_console.value();
   }
   SDL_RenderPresent(g_renderer);
   return SDL_APP_CONTINUE;

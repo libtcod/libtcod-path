@@ -27,7 +27,7 @@ TEST_CASE("TCODPATH_bfs", "") {
   auto flow_data = std::vector<TCODPATH_IndexType>(distance.get_shape().at(0) * distance.get_shape().at(1) * 2);
   auto flow_shape = std::array<TCODPATH_IndexType, 3>{distance.get_shape().at(0), distance.get_shape().at(1), 2};
   auto flow_map = TCODPATH_Map{};
-  TCODPATH_map_init_contigious(
+  TCODPATH_map_init_contigious_from(
       &flow_map,
       3,
       flow_shape.data(),

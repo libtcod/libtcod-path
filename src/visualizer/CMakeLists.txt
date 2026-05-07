@@ -19,9 +19,9 @@ project(
 
 file(GLOB ${PROJECT_NAME}_SOURCES CONFIGURE_DEPENDS *.cpp)
 add_executable(${PROJECT_NAME} ${${PROJECT_NAME}_SOURCES})
-target_compile_features(${PROJECT_NAME} INTERFACE c_std_99 cxx_std_17)
+target_compile_features(${PROJECT_NAME} PRIVATE c_std_99 cxx_std_20)
 
-target_link_libraries(${PROJECT_NAME}
+target_link_libraries(${PROJECT_NAME} PRIVATE
     libtcod-path::libtcod-path
     libtcod::libtcod
     SDL3::SDL3

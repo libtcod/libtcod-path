@@ -13,7 +13,8 @@ TEST_CASE("TCODPATH_differentials", "") {
   auto differentials_data = std::vector<int>(5 * 5 * 4);
   auto differentials_shape = std::vector<int>{5, 5, 4};
   auto differentials = TCODPATH_Map{};
-  TCODPATH_map_init_contigious(&differentials, 3, differentials_shape.data(), -4, (void*)differentials_data.data());
+  TCODPATH_map_init_contigious_from(
+      &differentials, 3, differentials_shape.data(), -4, (void*)differentials_data.data());
   auto partition = Map2D({5, 5}, 1);
   auto cost = Map2D({5, 5}, 1);
 

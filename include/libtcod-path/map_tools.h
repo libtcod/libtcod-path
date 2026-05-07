@@ -38,13 +38,25 @@ static inline void TCODPATH_map_delete(TCODPATH_Map* map) {
 /// @param shape Shape of the map and `data` array in row-major order
 /// @param int_type Integer type to use: `-4 = int32_t`, `1 = uint8_t`
 /// @param data Pointer to contigious memory, must be freed separately by default
-static inline void TCODPATH_map_init_contigious(
+static inline void TCODPATH_map_init_contigious_from(
     TCODPATH_Map* __restrict map, int dimensions, TCODPATH_IndexType* __restrict shape, int8_t int_type, void* data) {
   map->contigious = TCODPATH_MapContigious{TCODPATH_MAP_CONTIGIOUS};
   map->contigious.dimensions = dimensions;
   for (int i = 0; i < dimensions; ++i) map->contigious.shape[i] = shape[i];
   map->contigious.int_type = int_type;
   map->contigious.data = (unsigned char*)data;
+}
+static inline void TCODPATH_map_init_contigious(
+    TCODPATH_Map* __restrict map, int dimensions, TCODPATH_IndexType* __restrict shape, int8_t int_type) {
+  if (!shape) return;
+  size_t elements = 1;
+  for (int i = 0; i < dimensions; ++i) elements *= shape[i];
+  if (!int_type) int_type = -4;
+  void* data = (unsigned char*)calloc(elements, TCODPATH_ABS(int_type));
+  if (!data) return;
+  TCODPATH_map_init_contigious_from(map, dimensions, shape, int_type, data);
+  map->contigious.owned_data = 1;
+  return;
 }
 /// @brief Return a new contigious map.
 /// @param dimensions Number of dimensions of `shape`
@@ -55,16 +67,11 @@ static inline TCODPATH_Map* TCODPATH_map_new(int dimensions, TCODPATH_IndexType*
   if (!shape) return NULL;
   TCODPATH_Map* map = (TCODPATH_Map*)calloc(1, sizeof(*map));
   if (!map) return NULL;
-  size_t elements = 1;
-  for (int i = 0; i < dimensions; ++i) elements *= shape[i];
-  if (!int_type) int_type = -4;
-  void* data = (unsigned char*)calloc(elements, TCODPATH_ABS(int_type));
-  if (!data) {
+  TCODPATH_map_init_contigious(map, dimensions, shape, int_type);
+  if (!map->contigious.data) {
     TCODPATH_map_delete(map);
     return NULL;
   }
-  TCODPATH_map_init_contigious(map, dimensions, shape, int_type, data);
-  map->contigious.owned_data = 1;
   return map;
 }
 /// @brief Return the dimensions of `map`. Returns `0` if invalid.
