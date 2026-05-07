@@ -39,7 +39,7 @@ TEST_CASE("TCODPATH_partition", "") {
   };
 }
 
-TEST_CASE("TCODPATH_partition large", "") {
+TEST_CASE("TCODPATH_partition large", "[.slow]") {
   auto costs = Map2D({2048, 2048}, 1);
   auto graph = as_2d_graph(costs, 1, 0);
   auto partition = Map2D(costs.get_shape(), 0);
