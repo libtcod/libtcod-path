@@ -9,7 +9,7 @@
 #include "map_types.h"
 #include "utility.h"
 
-/// @brief Uninitialize maps, freeing owned pointers and zeroing data.
+/// @brief Uninitialize maps, freeing owned pointers.
 /// @param map Pointer to generic map, can be NULL
 static inline void TCODPATH_map_uninit(TCODPATH_Map* map) {
   if (!map) return;
@@ -23,7 +23,7 @@ static inline void TCODPATH_map_uninit(TCODPATH_Map* map) {
     default:
       break;
   }
-  memset(map, 0, sizeof(*map));
+  map->type = TCODPATH_MAP_UNDEFINED;
 }
 /// @brief Release a map from memory.
 /// @param map Pointer to generic map, can be NULL
@@ -40,7 +40,7 @@ static inline void TCODPATH_map_delete(TCODPATH_Map* map) {
 /// @param data Pointer to contigious memory, must be freed separately by default
 static inline void TCODPATH_map_init_contigious(
     TCODPATH_Map* __restrict map, int dimensions, TCODPATH_IndexType* __restrict shape, int8_t int_type, void* data) {
-  map->type = TCODPATH_MAP_CONTIGIOUS;
+  map->contigious = TCODPATH_MapContigious{TCODPATH_MAP_CONTIGIOUS};
   map->contigious.dimensions = dimensions;
   for (int i = 0; i < dimensions; ++i) map->contigious.shape[i] = shape[i];
   map->contigious.int_type = int_type;
