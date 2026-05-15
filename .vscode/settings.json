@@ -34,5 +34,7 @@
         "LIBTCODPATH_CPACK": "ON",
         "LIBTCODPATH_TESTS": "ON",
         "LIBTCODPATH_TOOLS": "ON",
+        "SDL_SHARED": "OFF", // Workaround CMake being unable to reliably copy shared SDL library
+        "SDL_STATIC": "ON",
     }
 }
