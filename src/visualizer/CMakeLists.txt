@@ -3,7 +3,7 @@ include(FetchContent)
 FetchContent_Declare(
     libtcod
     GIT_REPOSITORY https://github.com/libtcod/libtcod
-    GIT_SUBMODULES
+    GIT_SUBMODULES ""
     GIT_TAG 2.2.2-73-gb122e2a4
 )
 set(LIBTCOD_THREADS OFF)
