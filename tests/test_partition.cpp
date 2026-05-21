@@ -15,28 +15,24 @@
 
 TEST_CASE("TCODPATH_partition", "") {
   static const auto TEST_DATA = std::vector<std::string>{
-      "111#22#",
-      "111#2#3",
-      "111##33",
+      "1110220",
+      "1110203",
+      "1110033",
   };
   static const auto shape = std::array{
       static_cast<TCODPATH_IndexType>(TEST_DATA.size()), static_cast<TCODPATH_IndexType>(TEST_DATA.at(0).size())};
-  auto costs = Map2D(shape);
-  for (int y = 0; y < TEST_DATA.size(); ++y) {
-    for (int x = 0; x < TEST_DATA.at(y).size(); ++x) {
-      costs[{y, x}] = TEST_DATA.at(y).at(x) != '#' ? 1 : 0;
+  auto costs = Map2D(shape, -1);
+  for (TCODPATH_IndexType y = 0; y < TEST_DATA.size(); ++y) {
+    for (TCODPATH_IndexType x = 0; x < TEST_DATA.at(y).size(); ++x) {
+      costs[{y, x}] = TEST_DATA.at(y).at(x) != '0' ? 1 : 0;
+      auto ij = std::array<TCODPATH_IndexType, 2>{y, x};
+      REQUIRE(TCODPATH_map_get(costs.c_data(), ij.data()) == costs[{y, x}]);
     }
   };
   auto graph = as_2d_graph(costs, 1, 0);
   auto partition = Map2D(shape, -1);
-  TCODPATH_partition_from_graph(&graph, partition.c_data());
-  for (int y = 0; y < TEST_DATA.size(); ++y) {
-    auto line = std::string();
-    for (int x = 0; x < TEST_DATA.at(y).size(); ++x) {
-      line.push_back((partition[{y, x}] == 0) ? '#' : '0' + (char)partition[{y, x}]);
-    }
-    CHECK(TEST_DATA.at(y) == line);
-  };
+  CHECK(TCODPATH_partition_from_graph(&graph, partition.c_data()) == 3);
+  CHECK(as_string(partition) == as_string(TEST_DATA));
 }
 
 TEST_CASE("TCODPATH_partition large", "[.slow]") {

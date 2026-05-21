@@ -29,11 +29,11 @@ class Map2D {
 
   value_type& operator[](const std::array<int, 2>& ij) noexcept {
     range_check(ij);
-    return data_.at(ij.at(0) * shape_.at(0) + ij.at(1));
+    return data_.at(ij.at(0) * shape_.at(1) + ij.at(1));
   }
   const value_type& operator[](const std::array<int, 2>& ij) const noexcept {
     range_check(ij);
-    return data_.at(ij.at(0) * shape_.at(0) + ij.at(1));
+    return data_.at(ij.at(0) * shape_.at(1) + ij.at(1));
   }
 
   TCODPATH_Map* c_data() noexcept { return &map_c_; }

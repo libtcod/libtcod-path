@@ -1,5 +1,7 @@
 #pragma once
 
+#include <stdbool.h>
+
 #include "graph_types.h"
 #include "map_tools.h"
 
@@ -17,7 +19,6 @@ static inline void TCODPATH_graph_foreach_edge(
     void* userdata) {
   switch (graph->type) {
     case TCODPATH_GRAPH_BASIC2D: {
-      if (TCODPATH_map_get(graph->basic2d.map, index) <= 0) return;  // Can not move from here (this test might be slow)
       TCODPATH_IndexType leaf_index[TCODPATH_MAX_DIMENSIONS];
       for (int i = 0; i < n; ++i) leaf_index[i] = index[i];  // Copy whole index, required for 3D+ graphs
       for (TCODPATH_ValueType y = -1; y <= 1; ++y) {  // Iterate over 3x3 grid surrounding index
@@ -38,4 +39,20 @@ static inline void TCODPATH_graph_foreach_edge(
     default:
       break;
   }
+}
+/// @brief Return true if `index` on `graph` is a valid landing place.
+/// @param graph The graph to traverse. Must not be `NULL`.
+/// @param n Length of `index`.
+/// @param index Node to check. Must not be `NULL`.
+static inline bool TCODPATH_graph_is_open_node(
+    TCODPATH_Graph* __restrict graph, int n, const TCODPATH_IndexType* __restrict index) {
+  switch (graph->type) {
+    case TCODPATH_GRAPH_BASIC2D:
+      return (TCODPATH_map_get(graph->basic2d.map, index) > 0);
+    case TCODPATH_GRAPH_STATIC:
+      return (TCODPATH_map_get(graph->static_edges.map, index) > 0);
+    default:
+      break;
+  }
+  return true;
 }

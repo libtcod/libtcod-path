@@ -14,7 +14,7 @@ inline auto wall_costs_from_test_data(const std::vector<std::string>& test_data)
   return map;
 }
 
-template <typename T = int>
+template <typename T = TCODPATH_ValueType>
 inline auto as_2d_graph(Map2D<T>& map, TCODPATH_ValueType cardinal, TCODPATH_ValueType diagonal) -> TCODPATH_Graph {
   auto graph = TCODPATH_Graph{};
   graph.basic2d = TCODPATH_GraphBasic2D{
@@ -27,7 +27,7 @@ inline auto as_2d_graph(Map2D<T>& map, TCODPATH_ValueType cardinal, TCODPATH_Val
 }
 
 inline auto as_string(const std::vector<std::string>& input) -> std::string {
-  auto string = std::string{};
+  auto string = std::string{"\n"};
   for (int y = 0; y < input.size(); ++y) {
     string.append(input.at(y));
     if (y != input.size() - 1) string.push_back('\n');
@@ -36,7 +36,7 @@ inline auto as_string(const std::vector<std::string>& input) -> std::string {
 }
 template <typename T = int>
 inline auto as_string(const Map2D<T>& input) -> std::string {
-  auto string = std::string{};
+  auto string = std::string{"\n"};
   for (int y = 0; y < input.get_shape().at(0); ++y) {
     for (int x = 0; x < input.get_shape().at(1); ++x) {
       string.push_back(input[{y, x}] == std::numeric_limits<T>::max() ? '#' : '0' + (char)input[{y, x}]);

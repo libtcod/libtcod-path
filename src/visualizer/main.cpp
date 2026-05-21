@@ -1,9 +1,11 @@
 #define SDL_MAIN_USE_CALLBACKS
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_main.h>
+#include <libtcod-path/flow_tools.h>
 #include <libtcod-path/graph_tools.h>
 #include <libtcod-path/heuristic_tools.h>
 #include <libtcod-path/map_tools.h>
+#include <libtcod-path/uniform_cost_search.h>
 #include <libtcod.h>
 
 #include <fstream>
@@ -24,10 +26,11 @@ struct Deleter {
 using MapPtr = std::unique_ptr<TCODPATH_Map, Deleter>;
 
 struct MapData {
-  tcod::path::Map2D<> costs{};
-  TCODPATH_Graph graph;
-  tcod::path::Map2D<> distance{};
-  MapPtr flow{};
+  tcod::path::Map2D<> costs{};  // Active fixed costs
+  TCODPATH_Graph graph;  // Active fixed graph
+  tcod::path::Map2D<> distance{};  // Computed distance
+  MapPtr flow{};  // Computed flow map
+  std::vector<std::array<int, 2>> path{};  // Active traced path
 };
 
 static MapData g_map_data{};
@@ -148,6 +151,9 @@ SDL_AppResult SDL_AppIterate(void*) {
         }
       }
     }
+    // Draw path
+    for (const auto [i, j] : g_map_data.path) pixels_rgb.at(i * console.get_width() + j) = {255, 0, 0};
+
     SDL_UpdateTexture(g_texture, NULL, pixels_rgb.data(), console.get_width() * 3);
 
     SDL_RenderTexture(g_renderer, g_texture, NULL, NULL);
@@ -162,6 +168,22 @@ SDL_AppResult SDL_AppEvent(void*, SDL_Event* event) {
     case SDL_EVENT_DROP_FILE:
       load_map(event->drop.data);
       break;
+    case SDL_EVENT_MOUSE_BUTTON_DOWN: {
+      const auto pos_ij = std::array<int, 2>{(int)event->button.y, (int)event->button.x};
+      if (g_map_data.distance.in_bounds(pos_ij)) {
+        TCODPATH_map_clear_max(g_map_data.distance.c_data());
+        TCODPATH_flow_reset(g_map_data.flow.get());
+        g_map_data.path.clear();
+        g_map_data.distance[pos_ij] = 0;
+        TCODPATH_dijkstra(&g_map_data.graph, g_map_data.distance.c_data(), g_map_data.flow.get());
+      }
+    } break;
+    case SDL_EVENT_MOUSE_MOTION: {
+      g_map_data.path.clear();
+      auto pos_ij = std::array<int, 2>{(int)event->button.y, (int)event->button.x};
+      g_map_data.path.push_back(pos_ij);
+      while (TCODPATH_flow_iter_next(g_map_data.flow.get(), pos_ij.data()) == 0) g_map_data.path.push_back(pos_ij);
+    } break;
     default:
       break;
   }

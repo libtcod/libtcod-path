@@ -356,3 +356,14 @@ static inline void TCODPATH_map_clear_max(TCODPATH_Map* __restrict map) {
     TCODPATH_map_set_max(map, index);
   };
 }
+/// @brief Set all values on `map` to `value`
+/// @param map Pointer to a `map`. Can be NULL.
+/// @param value The clear Value to set all elements to.
+static inline void TCODPATH_map_clear(TCODPATH_Map* __restrict map, TCODPATH_ValueType value) {
+  if (!map) return;
+  TCODPATH_IndexType index[TCODPATH_MAX_DIMENSIONS];
+  for (TCODPATH_indexes_iter_begin(TCODPATH_map_get_dimensions(map), index);
+       TCODPATH_indexes_iter_step(TCODPATH_map_get_dimensions(map), TCODPATH_map_get_shape(map), index);) {
+    TCODPATH_map_set(map, index, value);
+  };
+}

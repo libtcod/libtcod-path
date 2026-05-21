@@ -9,25 +9,20 @@
 #include "map_types.h"
 #include "ring_buffer.h"
 
-static inline void TCODPATH_partition_set_bool_if_open(
-    void* userdata, const TCODPATH_IndexType*, const TCODPATH_IndexType*, TCODPATH_ValueType) {
-  *(bool*)userdata = true;
-}
-
 struct TCODPATH_FloodFill_ {
   TCODPATH_RingBuffer frontier;
   TCODPATH_Graph* graph;
-  TCODPATH_Map* __restrict map;
+  TCODPATH_Map* __restrict partitions;
   TCODPATH_ValueType value;
 };
 
 static inline void TCODPATH_partition_flood_fill(
     void* userdata, const TCODPATH_IndexType*, const TCODPATH_IndexType* __restrict leaf_index, TCODPATH_ValueType) {
   struct TCODPATH_FloodFill_* data = (struct TCODPATH_FloodFill_*)userdata;
-  if (TCODPATH_map_get(data->map, leaf_index) != 0) return;
-  TCODPATH_map_set(data->map, leaf_index, data->value);
+  if (TCODPATH_map_get(data->partitions, leaf_index) != 0) return;
+  TCODPATH_map_set(data->partitions, leaf_index, data->value);
   TCODPATH_ring_buffer_append(
-      &data->frontier, sizeof(*leaf_index) * TCODPATH_map_get_dimensions(data->map), leaf_index);
+      &data->frontier, sizeof(*leaf_index) * TCODPATH_map_get_dimensions(data->partitions), leaf_index);
 }
 
 static inline int TCODPATH_partition_from_graph(TCODPATH_Graph* __restrict graph, TCODPATH_Map* __restrict out) {
@@ -36,20 +31,17 @@ static inline int TCODPATH_partition_from_graph(TCODPATH_Graph* __restrict graph
   TCODPATH_IndexType index[TCODPATH_MAX_DIMENSIONS];
 
   // Clear map
-  for (TCODPATH_indexes_iter_begin(dimensions, index); TCODPATH_indexes_iter_step(dimensions, shape, index);) {
-    TCODPATH_map_set(out, index, 0);
-  }
+  TCODPATH_map_clear(out, 0);
   // Partition map
   TCODPATH_ValueType total_partitions = 0;
   struct TCODPATH_FloodFill_ flood_fill_data = {};
   for (TCODPATH_indexes_iter_begin(dimensions, index); TCODPATH_indexes_iter_step(dimensions, shape, index);) {
     if (TCODPATH_map_get(out, index) != 0) continue;  // Partition already known for this index
-    bool is_open = false;
-    TCODPATH_graph_foreach_edge(graph, dimensions, index, TCODPATH_partition_set_bool_if_open, (void*)&is_open);
-    if (!is_open) continue;  // Node has no edges
+    const bool is_open = TCODPATH_graph_is_open_node(graph, dimensions, index);
+    if (!is_open) continue;  // Node is not open
     ++total_partitions;
     flood_fill_data.graph = graph;
-    flood_fill_data.map = out;
+    flood_fill_data.partitions = out;
     flood_fill_data.value = total_partitions;
     TCODPATH_partition_flood_fill(&flood_fill_data, NULL, index, 0);
     while (flood_fill_data.frontier.used_bytes) {  // Until ring buffer is empty
