@@ -1,5 +1,6 @@
 #pragma once
 
+#include "goal_tools.h"
 #include "graph_tools.h"
 #include "graph_types.h"
 #include "heapq_tools.h"
@@ -27,12 +28,15 @@ static inline void TCODPATH_ucs_set_edge(
 }
 
 /// @brief Preform a single iteration of UCS. Return the status.
-/// @return `1` when complete, `0` when incomplete, negative value on error.
+/// @return `1` when exhausted, `2` when goal reached, `0` when incomplete, negative value on error.
 static inline int TCODPATH_ucs_step(TCODPATH_UniformCostSearch* __restrict ucs_data) {
   if (!ucs_data) return TCODPATH_E_INVALID_ARGUMENT;
   if (ucs_data->frontier.size <= 0) return 1;  // Iteration complete
 
   TCODPATH_IndexType index[TCODPATH_MAX_DIMENSIONS];
+  if (TCODPATH_goal_is_reached(ucs_data->goal, ucs_data->dimensions, (TCODPATH_IndexType*)ucs_data->frontier.heap)) {
+    return 2;  // Goal reached
+  }
   TCODPATH_minheap_pop(&ucs_data->frontier, index);
   TCODPATH_graph_foreach_edge(ucs_data->graph, ucs_data->dimensions, index, TCODPATH_ucs_set_edge, ucs_data);
   return 0;  // Iteration continues

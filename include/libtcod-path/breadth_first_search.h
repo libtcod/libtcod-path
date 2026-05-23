@@ -1,6 +1,7 @@
 #pragma once
 
 #include "breadth_first_search_types.h"
+#include "goal_tools.h"
 #include "graph_tools.h"
 #include "map_tools.h"
 #include "ring_buffer.h"
@@ -25,7 +26,9 @@ static inline int TCODPATH_bfs_step(TCODPATH_BreadthFirstSearch* __restrict bfs_
   if (bfs_data->frontier.used_bytes <= 0) return 1;  // Iteration complete
 
   TCODPATH_IndexType index[TCODPATH_MAX_DIMENSIONS];
-  TCODPATH_ring_buffer_pop(&bfs_data->frontier, sizeof(*index) * bfs_data->dimensions, index);
+  TCODPATH_ring_buffer_peek(&bfs_data->frontier, sizeof(*index) * bfs_data->dimensions, index);
+  if (TCODPATH_goal_is_reached(bfs_data->goal, bfs_data->dimensions, index)) return 2;  // Goal reached
+  TCODPATH_ring_buffer_pop(&bfs_data->frontier, sizeof(*index) * bfs_data->dimensions, NULL);
   TCODPATH_graph_foreach_edge(bfs_data->graph, bfs_data->dimensions, index, TCODPATH_bfs_set_edge, bfs_data);
   return 0;  // Iteration continues
 }

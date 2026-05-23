@@ -65,3 +65,15 @@ static inline int TCODPATH_ring_buffer_append(
   }
   return 0;
 }
+static inline int TCODPATH_ring_buffer_peek(
+    TCODPATH_RingBuffer* __restrict buffer, ptrdiff_t n_bytes, const void* __restrict data_out) {
+  unsigned char* data = (unsigned char*)data_out;
+  ptrdiff_t begin = buffer->begin;
+  while (n_bytes) {
+    if (buffer->used_bytes == 0) return -1;  // Data Underflow
+    if (data) *data++ = buffer->data[begin];
+    if (++begin == buffer->capacity) begin = 0;
+    --n_bytes;
+  }
+  return 0;
+}

@@ -3,7 +3,7 @@
 #include "config.h"
 #include "map_types.h"
 
-typedef void TCODPATH_GraphCallback(
+typedef void (*TCODPATH_GraphCallback)(
     void* userdata,
     const TCODPATH_IndexType* __restrict root_index,
     const TCODPATH_IndexType* __restrict leaf_index,

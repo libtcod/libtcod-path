@@ -1,5 +1,6 @@
 #pragma once
 
+#include "goal_types.h"
 #include "graph_types.h"
 #include "heapq_types.h"
 #include "heuristic_types.h"
@@ -13,4 +14,5 @@ typedef struct TCODPATH_UniformCostSearch {
   TCODPATH_Heuristic* __restrict heuristic;
   TCODPATH_Map* __restrict distance;
   TCODPATH_Map* __restrict flow;
+  TCODPATH_Goal* __restrict goal;
 } TCODPATH_UniformCostSearch;
