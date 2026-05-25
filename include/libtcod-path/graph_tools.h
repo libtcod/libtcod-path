@@ -40,12 +40,25 @@ static inline void TCODPATH_graph_foreach_edge(
       break;
   }
 }
+static inline int TCODPATH_graph_get_dimensions(const TCODPATH_Graph* __restrict graph) {
+  if (!graph) return 0;
+  switch (graph->type) {
+    case TCODPATH_GRAPH_BASIC2D:
+      return TCODPATH_map_get_dimensions(graph->basic2d.map);
+    case TCODPATH_GRAPH_STATIC:
+      return graph->static_edges.dimensions;
+    default:
+      return 0;
+  }
+}
 /// @brief Return true if `index` on `graph` is a valid landing place.
 /// @param graph The graph to traverse. Must not be `NULL`.
 /// @param n Length of `index`.
 /// @param index Node to check. Must not be `NULL`.
 static inline bool TCODPATH_graph_is_open_node(
     TCODPATH_Graph* __restrict graph, int n, const TCODPATH_IndexType* __restrict index) {
+  if (!graph) return false;
+  if (TCODPATH_graph_get_dimensions(graph) != n) return false;
   switch (graph->type) {
     case TCODPATH_GRAPH_BASIC2D:
       return (TCODPATH_map_get(graph->basic2d.map, index) > 0);

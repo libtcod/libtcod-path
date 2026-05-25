@@ -9,6 +9,7 @@
     "editor.formatOnSave": true,
     "editor.defaultFormatter": "xaver.clang-format",
     "cSpell.words": [
+        "astar",
         "Benesch",
         "buildsystems",
         "CPACK",

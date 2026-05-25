@@ -1,6 +1,7 @@
 #pragma once
 
 #include "goal_types.h"
+#include "map_tools.h"
 
 static inline bool TCODPATH_goal_is_reached(
     const TCODPATH_Goal* __restrict goal, int dimensions, const TCODPATH_IndexType* __restrict index) {
